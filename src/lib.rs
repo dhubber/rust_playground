@@ -24,8 +24,11 @@ pub fn run(bgColor: Color4, shape: Vec<Vertex2d>) {
     let vertex_shader_src = r#"
     #version 140
     in vec2 position;
+    uniform float x;
     void main() {
-        gl_Position = vec4(position, 0.0, 1.0);
+        vec2 pos = position;
+        pos.x += x;
+        gl_Position = vec4(pos, 0.0, 1.0);
     }
 "#;
 
@@ -50,12 +53,29 @@ pub fn run(bgColor: Color4, shape: Vec<Vertex2d>) {
                &Default::default()).unwrap();
     frame.finish().unwrap();
 
+    let mut t: f32 = 0.0;
+
     event_loop.run(move |event, _, control_flow| {
         match event {
             winit::event::Event::WindowEvent { event, .. } => match event {
                 winit::event::WindowEvent::CloseRequested => control_flow.set_exit(),
+                winit::event::WindowEvent::Resized(window_size) => {
+                    display.resize(window_size.into());
+                }
                 _ => (),
             },
+            winit::event::Event::RedrawEventsCleared => {
+                _window.request_redraw();
+            },
+            winit::event::Event::RedrawRequested(_) => {
+                t += 0.02;
+                let x = t.sin() * 0.5;
+                let mut frame = display.draw();
+                frame.clear_color(bgColor.r, bgColor.g, bgColor.b, bgColor.a);
+                frame.draw(&vertex_buffer, &indices, &program, &uniform! {x: x},
+                           &Default::default()).unwrap();
+                frame.finish().unwrap();
+            }
             _ => (),
         };
     });

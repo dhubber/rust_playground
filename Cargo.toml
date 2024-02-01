@@ -1,0 +1,21 @@
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[package]
+name = "rust_playground"
+version = "0.1.0"
+authors = ["David Hubber"]
+edition = "2021"
+description = "Some simple games"
+readme = "README.md"
+
+[dependencies]
+glium = "0.33"
+winit = "0.28.7"
+
+[lib]
+name = "rpgf"
+path = "src/lib.rs"
+
+[[bin]]
+name = "breakout"
+path = "src/bin.rs"

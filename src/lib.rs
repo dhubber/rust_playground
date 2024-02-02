@@ -4,11 +4,18 @@ use glium::{implement_vertex, Surface};
 //use glium::buffer::BufferMode::Default;
 use winit::event_loop;
 
+#[derive(Copy, Clone, Debug)]
 pub struct Color4 {
     pub r: f32,
     pub g: f32,
     pub b: f32,
     pub a: f32,
+}
+
+#[derive(Debug)]
+pub struct WindowParameters {
+    pub background_color: Color4,
+    pub title: String
 }
 
 /// Simple 2d vertex
@@ -19,7 +26,7 @@ pub struct Vertex2d {
 implement_vertex!(Vertex2d, position);
 
 /// Creates a window using the glium crate
-pub fn run(bgColor: Color4, shape: Vec<Vertex2d>) {
+pub fn run(window_parameters: &WindowParameters, shape: Vec<Vertex2d>) {
 
     let vertex_shader_src = r#"
     #version 140
@@ -48,7 +55,8 @@ pub fn run(bgColor: Color4, shape: Vec<Vertex2d>) {
     let program = glium::Program::from_source(&display, vertex_shader_src, fragment_shader_src, None).unwrap();
 
     let mut frame = display.draw();
-    frame.clear_color(bgColor.r, bgColor.g, bgColor.b, bgColor.a);
+    let color = window_parameters.background_color.clone();
+    frame.clear_color(color.r, color.g, color.b, color.a);
     frame.draw(&vertex_buffer, &indices, &program, &glium::uniforms::EmptyUniforms,
                &Default::default()).unwrap();
     frame.finish().unwrap();
@@ -71,7 +79,7 @@ pub fn run(bgColor: Color4, shape: Vec<Vertex2d>) {
                 t += 0.02;
                 let x = t.sin() * 0.5;
                 let mut frame = display.draw();
-                frame.clear_color(bgColor.r, bgColor.g, bgColor.b, bgColor.a);
+                frame.clear_color(color.r, color.g, color.b, color.a);
                 frame.draw(&vertex_buffer, &indices, &program, &uniform! {x: x},
                            &Default::default()).unwrap();
                 frame.finish().unwrap();

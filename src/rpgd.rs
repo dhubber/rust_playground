@@ -1,8 +1,7 @@
 #[macro_use]
 extern crate glium;
+
 use glium::{implement_vertex, Surface};
-//use glium::buffer::BufferMode::Default;
-use winit::event_loop;
 
 #[derive(Copy, Clone, Debug)]
 pub struct Color4 {
@@ -25,32 +24,48 @@ pub struct Vertex2d {
 }
 implement_vertex!(Vertex2d, position);
 
+#[derive(Copy, Clone, Debug)]
+pub struct GameObject {
+    pub position: [f32; 2],
+    pub scale: [f32; 2],
+    pub color: [f32; 4]
+}
+
+
 /// Creates a window using the glium crate
-pub fn run(window_parameters: &WindowParameters, shape: Vec<Vertex2d>) {
+pub fn run(window_parameters: &WindowParameters, objects: Vec<GameObject>) {
+
+    let rectangle_vertex_data = vec![
+        Vertex2d{ position: [-0.5, -0.5]},
+        Vertex2d{ position: [0.5, -0.5]},
+        Vertex2d{ position: [0.5, 0.5]},
+        Vertex2d{ position: [-0.5, -0.5]},
+        Vertex2d{ position: [0.5, 0.5]},
+        Vertex2d{ position: [-0.5, 0.5]},
+    ];
 
     let vertex_shader_src = r#"
     #version 140
     in vec2 position;
-    uniform float x;
+    uniform mat4 matrix;
     void main() {
-        vec2 pos = position;
-        pos.x += x;
-        gl_Position = vec4(pos, 0.0, 1.0);
+        gl_Position = matrix * vec4(position, 0.0, 1.0);
     }
 "#;
 
     let fragment_shader_src = r#"
     #version 140
     out vec4 color;
+    uniform vec4 col;
     void main() {
-        color = vec4(1.0, 0.0, 0.0, 1.0);
+        color = col;
     }
 "#;
 
     let event_loop = winit::event_loop::EventLoopBuilder::new().build();
     let (_window, display) = glium::backend::glutin::SimpleWindowBuilder::new().build(&event_loop);
 
-    let vertex_buffer = glium::VertexBuffer::new(&display, &shape).unwrap();
+    let vertex_buffer = glium::VertexBuffer::new(&display, &rectangle_vertex_data).unwrap();
     let indices = glium::index::NoIndices(glium::index::PrimitiveType::TrianglesList);
     let program = glium::Program::from_source(&display, vertex_shader_src, fragment_shader_src, None).unwrap();
 
@@ -77,11 +92,23 @@ pub fn run(window_parameters: &WindowParameters, shape: Vec<Vertex2d>) {
             },
             winit::event::Event::RedrawRequested(_) => {
                 t += 0.02;
-                let x = t.sin() * 0.5;
+                let _x = t.sin() * 0.5;
                 let mut frame = display.draw();
                 frame.clear_color(color.r, color.g, color.b, color.a);
-                frame.draw(&vertex_buffer, &indices, &program, &uniform! {x: x},
-                           &Default::default()).unwrap();
+                for object in objects.clone().into_iter() {
+                    let uniforms = uniform! {
+                        position: object.position,
+                        matrix: [
+                            [object.scale[0], 0.0, 0.0, 0.0],
+                            [0.0, object.scale[1], 0.0, 0.0],
+                            [0.0, 0.0, 1.0, 0.0],
+                            [object.position[0], object.position[1], 0.0, 1.0f32],
+                        ],
+                        col: object.color,
+                    };
+                    frame.draw(&vertex_buffer, &indices, &program, &uniforms,
+                               &Default::default()).unwrap();
+                }
                 frame.finish().unwrap();
             }
             _ => (),

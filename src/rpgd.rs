@@ -7,6 +7,7 @@ extern crate glam;
 use glium::{implement_vertex, Surface};
 use glam::{Mat4};
 use std::time::Instant;
+use winit::event::ElementState;
 pub use camera::Camera2d;
 
 #[derive(Copy, Clone, Debug)]
@@ -86,18 +87,37 @@ pub fn run(window_parameters: WindowParameters, camera2d: Camera2d, objects: Vec
 
     let mut frame = display.draw();
     let color = window_parameters.background_color.clone();
-    frame.clear_color(color.r, color.g, color.b, color.a);
-    frame.finish().unwrap();
-
     let start = Instant::now();
     let mut last_time: f32 = 0.0;
 
+    let mut x_bat = 0.0;
+    let mut num_frames = 0;
+    let bat_speed = 1.0;
+    let mut left_pressed = false;
+    let mut right_pressed = false;
+
     event_loop.run(move |event, _, control_flow| {
+
         match event {
             winit::event::Event::WindowEvent { event, .. } => match event {
                 winit::event::WindowEvent::CloseRequested => control_flow.set_exit(),
                 winit::event::WindowEvent::Resized(window_size) => {
                     display.resize(window_size.into());
+                },
+                winit::event::WindowEvent::KeyboardInput { device_id, input, is_synthetic } => match input.virtual_keycode {
+                    None => (),
+                    Some(key_code) => match key_code {
+                        winit::event::VirtualKeyCode::Left => {
+                            left_pressed = if input.state == ElementState::Pressed { true } else { false }
+                        },
+                        winit::event::VirtualKeyCode::Right => {
+                            right_pressed = if input.state == ElementState::Pressed { true } else { false }
+                        },
+                        winit::event::VirtualKeyCode::Escape => {
+                            control_flow.set_exit()
+                        },
+                        _ => (),
+                    },
                 }
                 _ => (),
             },
@@ -111,6 +131,13 @@ pub fn run(window_parameters: WindowParameters, camera2d: Camera2d, objects: Vec
                 let time = start.elapsed().as_secs_f32();
                 let delta = time - last_time;
                 last_time = time;
+                num_frames += 1;
+                let fps: f32 = (num_frames as f32) / time;
+                if num_frames % 100 == 0 { println!("{fps} {time} {} {last_time}", bat_speed*delta); }
+
+                if left_pressed { x_bat -= bat_speed * delta; }
+                if right_pressed { x_bat += bat_speed * delta; }
+
 
                 for object in objects.clone().into_iter() {
                     let model_matrix = Mat4::from_cols_array_2d(
@@ -118,7 +145,7 @@ pub fn run(window_parameters: WindowParameters, camera2d: Camera2d, objects: Vec
                             [object.scale[0], 0.0, 0.0, 0.0],
                             [0.0, object.scale[1], 0.0, 0.0],
                             [0.0, 0.0, 1.0, 0.0],
-                            [object.position[0], object.position[1], 0.0, 1.0f32],
+                            [object.position[0] + x_bat , object.position[1], 0.0, 1.0f32],
                         ],
                     );
                     let uniforms = uniform! {

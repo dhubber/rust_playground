@@ -8,11 +8,6 @@ edition = "2021"
 description = "Some simple games"
 readme = "README.md"
 
-[dependencies]
-glium = "0.33"
-winit = "0.28.7"
-glam = "0.25.0"
-
 [lib]
 name = "rpgf"
 path = "src/rpgd.rs"
@@ -20,3 +15,9 @@ path = "src/rpgd.rs"
 [[bin]]
 name = "breakout"
 path = "src/bin/bin.rs"
+
+[dependencies]
+glium = "0.33"
+winit = "0.28.7"
+glam = "0.25.0"
+

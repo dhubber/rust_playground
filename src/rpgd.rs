@@ -6,6 +6,7 @@ extern crate glam;
 
 use glium::{implement_vertex, Surface};
 use glam::{Mat4};
+use std::time::Instant;
 pub use camera::Camera2d;
 
 #[derive(Copy, Clone, Debug)]
@@ -76,7 +77,7 @@ pub fn run(window_parameters: WindowParameters, camera2d: Camera2d, objects: Vec
 
     let event_loop = winit::event_loop::EventLoopBuilder::new().build();
     let (_window, display) = glium::backend::glutin::SimpleWindowBuilder::new()
-        .with_inner_size(window_parameters.width,window_parameters.height)
+        .with_inner_size(window_parameters.width, window_parameters.height)
         .build(&event_loop);
 
     let vertex_buffer = glium::VertexBuffer::new(&display, &rectangle_vertex_data).unwrap();
@@ -86,11 +87,10 @@ pub fn run(window_parameters: WindowParameters, camera2d: Camera2d, objects: Vec
     let mut frame = display.draw();
     let color = window_parameters.background_color.clone();
     frame.clear_color(color.r, color.g, color.b, color.a);
-    frame.draw(&vertex_buffer, &indices, &program, &glium::uniforms::EmptyUniforms,
-               &Default::default()).unwrap();
     frame.finish().unwrap();
 
-    let mut t: f32 = 0.0;
+    let start = Instant::now();
+    let mut last_time: f32 = 0.0;
 
     event_loop.run(move |event, _, control_flow| {
         match event {
@@ -105,10 +105,13 @@ pub fn run(window_parameters: WindowParameters, camera2d: Camera2d, objects: Vec
                 _window.request_redraw();
             },
             winit::event::Event::RedrawRequested(_) => {
-                t += 0.02;
-                let _x = t.sin() * 0.5;
                 let mut frame = display.draw();
                 frame.clear_color(color.r, color.g, color.b, color.a);
+
+                let time = start.elapsed().as_secs_f32();
+                let delta = time - last_time;
+                last_time = time;
+
                 for object in objects.clone().into_iter() {
                     let model_matrix = Mat4::from_cols_array_2d(
                         &[

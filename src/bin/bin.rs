@@ -28,5 +28,6 @@ fn main() {
             color: [0.0, 0.5, 0.0, 1.0],
         },
     ];
+
     rpgf::run(window_parameters, camera2d, objects);
 }

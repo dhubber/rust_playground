@@ -1,7 +1,12 @@
+pub mod camera;
+
 #[macro_use]
 extern crate glium;
+extern crate glam;
 
 use glium::{implement_vertex, Surface};
+use glam::{Mat4};
+pub use camera::Camera2d;
 
 #[derive(Copy, Clone, Debug)]
 pub struct Color4 {
@@ -13,6 +18,8 @@ pub struct Color4 {
 
 #[derive(Debug)]
 pub struct WindowParameters {
+    pub width: u32,
+    pub height: u32,
     pub background_color: Color4,
     pub title: String
 }
@@ -31,9 +38,8 @@ pub struct GameObject {
     pub color: [f32; 4]
 }
 
-
 /// Creates a window using the glium crate
-pub fn run(window_parameters: &WindowParameters, objects: Vec<GameObject>) {
+pub fn run(window_parameters: WindowParameters, camera2d: Camera2d, objects: Vec<GameObject>) {
 
     let rectangle_vertex_data = vec![
         Vertex2d{ position: [-0.5, -0.5]},
@@ -47,9 +53,11 @@ pub fn run(window_parameters: &WindowParameters, objects: Vec<GameObject>) {
     let vertex_shader_src = r#"
     #version 140
     in vec2 position;
-    uniform mat4 matrix;
+    uniform mat4 model;
+    uniform mat4 view;
+    uniform mat4 projection;
     void main() {
-        gl_Position = matrix * vec4(position, 0.0, 1.0);
+        gl_Position = projection * view * model * vec4(position, 0.0, 1.0);
     }
 "#;
 
@@ -62,8 +70,14 @@ pub fn run(window_parameters: &WindowParameters, objects: Vec<GameObject>) {
     }
 "#;
 
+    // Camera
+    let view = camera2d.view_matrix();
+    let projection = camera2d.projection_matrix();
+
     let event_loop = winit::event_loop::EventLoopBuilder::new().build();
-    let (_window, display) = glium::backend::glutin::SimpleWindowBuilder::new().build(&event_loop);
+    let (_window, display) = glium::backend::glutin::SimpleWindowBuilder::new()
+        .with_inner_size(window_parameters.width,window_parameters.height)
+        .build(&event_loop);
 
     let vertex_buffer = glium::VertexBuffer::new(&display, &rectangle_vertex_data).unwrap();
     let indices = glium::index::NoIndices(glium::index::PrimitiveType::TrianglesList);
@@ -96,14 +110,19 @@ pub fn run(window_parameters: &WindowParameters, objects: Vec<GameObject>) {
                 let mut frame = display.draw();
                 frame.clear_color(color.r, color.g, color.b, color.a);
                 for object in objects.clone().into_iter() {
-                    let uniforms = uniform! {
-                        position: object.position,
-                        matrix: [
+                    let model_matrix = Mat4::from_cols_array_2d(
+                        &[
                             [object.scale[0], 0.0, 0.0, 0.0],
                             [0.0, object.scale[1], 0.0, 0.0],
                             [0.0, 0.0, 1.0, 0.0],
                             [object.position[0], object.position[1], 0.0, 1.0f32],
                         ],
+                    );
+                    let uniforms = uniform! {
+                        position: object.position,
+                        model: model_matrix.to_cols_array_2d(),
+                        view: view.to_cols_array_2d(),
+                        projection: projection.to_cols_array_2d(),
                         col: object.color,
                     };
                     frame.draw(&vertex_buffer, &indices, &program, &uniforms,

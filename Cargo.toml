@@ -10,7 +10,7 @@ readme = "README.md"
 
 [lib]
 name = "rpgf"
-path = "src/rpgd.rs"
+path = "src/rpgf.rs"
 
 [[bin]]
 name = "breakout"

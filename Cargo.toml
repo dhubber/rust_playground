@@ -5,7 +5,7 @@ name = "rust_playground"
 version = "0.1.0"
 authors = ["David Hubber"]
 edition = "2021"
-description = "Some simple games"
+description = "Some simple games written in Rust"
 readme = "README.md"
 
 [lib]
@@ -21,4 +21,3 @@ glium = "0.33"
 winit = "0.28.7"
 glam = "0.25.0"
 rand = "0.8.5"
-

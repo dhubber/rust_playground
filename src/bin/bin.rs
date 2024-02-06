@@ -17,7 +17,7 @@ fn main() {
     };
 
     let mut scene = Scene::new("breakout".to_string());
-    scene.create_new_object([0.0, -0.4], [0.2, 0.05], [0.9, 0.9, 0.6, 1.0]);
+    scene.new_object([0.0, -0.4], [0.2, 0.05], [0.9, 0.9, 0.6, 1.0]);
 
     rpgf::run(window_parameters, camera2d, scene);
 }

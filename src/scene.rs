@@ -15,7 +15,7 @@ impl Scene {
         }
     }
 
-    pub fn create_new_object(&mut self, position: [f32; 2], scale: [f32; 2], color: [f32; 4]) {
+    pub fn new_object(&mut self, position: [f32; 2], scale: [f32; 2], color: [f32; 4]) {
         let mut rng = rand::thread_rng();
         let id: u128 = rng.gen();
         let object = GameObject {

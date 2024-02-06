@@ -1,4 +1,4 @@
-use rpgf::{Camera2d, Color4, GameObject, WindowParameters};
+use rpgf::{Camera2d, Color4, GameObject, Scene, WindowParameters};
 
 fn main() {
     let window_parameters = WindowParameters {
@@ -16,18 +16,8 @@ fn main() {
         z_far: 1.0
     };
 
-    let objects: Vec<GameObject> = vec![
-        GameObject{
-            position: [0.25, 0.25],
-            scale: [0.1, 0.1],
-            color: [0.5, 0.0, 0.0, 1.0],
-        },
-        GameObject{
-            position: [-0.25, -0.25],
-            scale: [0.2, 0.2],
-            color: [0.0, 0.5, 0.0, 1.0],
-        },
-    ];
+    let mut scene = Scene::new("breakout".to_string());
+    scene.create_new_object([0.0, -0.4], [0.2, 0.05], [0.9, 0.9, 0.6, 1.0]);
 
-    rpgf::run(window_parameters, camera2d, objects);
+    rpgf::run(window_parameters, camera2d, scene);
 }

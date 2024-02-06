@@ -20,4 +20,5 @@ path = "src/bin/bin.rs"
 glium = "0.33"
 winit = "0.28.7"
 glam = "0.25.0"
+rand = "0.8.5"
 

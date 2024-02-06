@@ -1,4 +1,6 @@
 pub mod camera;
+mod game_object;
+mod scene;
 
 #[macro_use]
 extern crate glium;
@@ -9,6 +11,8 @@ use glam::{Mat4};
 use std::time::Instant;
 use winit::event::ElementState;
 pub use camera::Camera2d;
+pub use game_object::*;
+pub use scene::*;
 
 #[derive(Copy, Clone, Debug)]
 pub struct Color4 {
@@ -33,15 +37,8 @@ pub struct Vertex2d {
 }
 implement_vertex!(Vertex2d, position);
 
-#[derive(Copy, Clone, Debug)]
-pub struct GameObject {
-    pub position: [f32; 2],
-    pub scale: [f32; 2],
-    pub color: [f32; 4]
-}
-
 /// Creates a window using the glium crate
-pub fn run(window_parameters: WindowParameters, camera2d: Camera2d, objects: Vec<GameObject>) {
+pub fn run(window_parameters: WindowParameters, camera2d: Camera2d, scene: Scene) {
 
     let rectangle_vertex_data = vec![
         Vertex2d{ position: [-0.5, -0.5]},
@@ -81,6 +78,7 @@ pub fn run(window_parameters: WindowParameters, camera2d: Camera2d, objects: Vec
         .with_inner_size(window_parameters.width, window_parameters.height)
         .build(&event_loop);
 
+    // OpenGL buffer and shader for rectangles
     let vertex_buffer = glium::VertexBuffer::new(&display, &rectangle_vertex_data).unwrap();
     let indices = glium::index::NoIndices(glium::index::PrimitiveType::TrianglesList);
     let program = glium::Program::from_source(&display, vertex_shader_src, fragment_shader_src, None).unwrap();
@@ -139,7 +137,7 @@ pub fn run(window_parameters: WindowParameters, camera2d: Camera2d, objects: Vec
                 if right_pressed { x_bat += bat_speed * delta; }
 
 
-                for object in objects.clone().into_iter() {
+                for (id,object) in scene.objects.clone().into_iter() {
                     let model_matrix = Mat4::from_cols_array_2d(
                         &[
                             [object.scale[0], 0.0, 0.0, 0.0],

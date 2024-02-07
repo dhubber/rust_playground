@@ -65,20 +65,22 @@ impl Renderer {
         frame.clear_color(color.r, color.g, color.b, color.a);
 
         for (id,object) in scene.objects.clone().into_iter() {
+            let transform2d = &object.transform2d;
+            let renderable = &object.renderable;
             let model_matrix = Mat4::from_cols_array_2d(
                 &[
-                    [object.scale[0], 0.0, 0.0, 0.0],
-                    [0.0, object.scale[1], 0.0, 0.0],
+                    [transform2d.scale[0], 0.0, 0.0, 0.0],
+                    [0.0, transform2d.scale[1], 0.0, 0.0],
                     [0.0, 0.0, 1.0, 0.0],
-                    [object.position[0] + x_bat , object.position[1], 0.0, 1.0f32],
+                    [transform2d.position[0] + x_bat , transform2d.position[1], 0.0, 1.0f32],
                 ],
             );
             let uniforms = uniform! {
-                        position: object.position,
+                        position: transform2d.position,
                         model: model_matrix.to_cols_array_2d(),
                         view: self.view.to_cols_array_2d(),
                         projection: self.projection.to_cols_array_2d(),
-                        col: object.color,
+                        col: renderable.color,
                     };
             frame.draw(&self.vertex_buffer, &self.indices, &self.program, &uniforms,
                        &Default::default()).unwrap();

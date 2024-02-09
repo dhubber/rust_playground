@@ -1,32 +1,48 @@
 use std::collections::HashMap;
 use rand::prelude::*;
-use crate::{GameObject, Transform2d, Renderable};
+use crate::{Event, GameObject};
 
 pub struct Scene {
     pub name: String,
-    pub objects: HashMap<u128,Box<GameObject>>
+    pub objects: HashMap<u128,Box<dyn GameObject>>
 }
 
 impl Scene {
-    pub fn new(name: String) -> Self {
+    pub fn new(name: String) -> Scene {
         Scene {
             name,
             objects: HashMap::new(),
         }
     }
 
-    pub fn new_object(&mut self, position: [f32; 2], scale: [f32; 2], color: [f32; 4]) {
-        let mut rng = rand::thread_rng();
-        let id: u128 = rng.gen();
-        let object = Box::new(GameObject {
-            id,
-            transform2d: Transform2d {position, scale},
-            renderable: Renderable {color},
-        });
+    pub fn add_to_scene(&mut self, object: Box<dyn GameObject>) -> u128 {
+        let id: u128 = self.generate_id();
         self.objects.insert(id, object);
+        id
     }
 
-    pub fn find_object(&mut self, id: &u128) -> Option<&mut Box<GameObject>> {
+    pub fn find_object(&mut self, id: &u128) -> Option<&mut Box<dyn GameObject>> {
         self.objects.get_mut(id)
+    }
+
+    pub fn update(&mut self, time: f32, delta: f32) {
+        for mut object in self.objects.values_mut() {
+            object.update(time, delta);
+        }
+    }
+
+    pub fn on_event(&mut self, id: u128, event: Event) {
+        let object = self.find_object(&id);
+        match object {
+            None => {}
+            Some(obj) => {
+                obj.on_event(event);
+            }
+        }
+    }
+
+    fn generate_id(&self) -> u128 {
+        let mut rng = rand::thread_rng();
+        rng.gen()
     }
 }

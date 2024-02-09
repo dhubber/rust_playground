@@ -10,10 +10,11 @@ pub struct Renderer {
     program: Program,
     view: Mat4,
     projection: Mat4,
+    background_color: Color4,
 }
 
 impl Renderer {
-    pub fn new(display: glium::Display<WindowSurface>, camera2d: Camera2d) -> Self {
+    pub fn new(display: glium::Display<WindowSurface>, camera2d: &Camera2d, background_color: &Color4) -> Self {
         let rectangle_vertex_data = vec![
             Vertex2d{ position: [-0.5, -0.5]},
             Vertex2d{ position: [0.5, -0.5]},
@@ -42,6 +43,7 @@ impl Renderer {
         color = col;
     }
 "#;
+
         // OpenGL buffer and shader for rectangles
         let vertex_buffer = glium::VertexBuffer::new(&display, &rectangle_vertex_data).unwrap();
         let indices = glium::index::NoIndices(glium::index::PrimitiveType::TrianglesList);
@@ -56,23 +58,24 @@ impl Renderer {
             indices,
             program,
             view,
-            projection
+            projection,
+            background_color: background_color.clone(),
         }
     }
 
-    pub fn render(&self, scene: &Scene, color: &Color4, x_bat: f32) {
+    pub fn render(&self, scene: &Scene) {
         let mut frame = self.display.draw();
-        frame.clear_color(color.r, color.g, color.b, color.a);
+        frame.clear_color(self.background_color.r, self.background_color.g, self.background_color.b, self.background_color.a);
 
-        for (id,object) in scene.objects.clone().into_iter() {
-            let transform2d = &object.transform2d;
-            let renderable = &object.renderable;
+        for (_id, object) in scene.objects.iter().clone() {
+            let transform2d = object.transform2d();
+            let renderable = object.renderable();
             let model_matrix = Mat4::from_cols_array_2d(
                 &[
                     [transform2d.scale[0], 0.0, 0.0, 0.0],
                     [0.0, transform2d.scale[1], 0.0, 0.0],
                     [0.0, 0.0, 1.0, 0.0],
-                    [transform2d.position[0] + x_bat , transform2d.position[1], 0.0, 1.0f32],
+                    [transform2d.position[0], transform2d.position[1], 0.0, 1.0f32],
                 ],
             );
             let uniforms = uniform! {

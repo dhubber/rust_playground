@@ -2,18 +2,19 @@ mod camera;
 mod game_object;
 mod scene;
 mod renderer;
+mod event;
 
 #[macro_use]
 extern crate glium;
 extern crate glam;
 
+use std::rc::Rc;
 use glium::{implement_vertex, Surface};
-use glam::{Mat4};
 use std::time::Instant;
-use winit::event::ElementState;
 pub use camera::Camera2d;
 pub use game_object::*;
 pub use scene::*;
+pub use event::{Event};
 use crate::renderer::Renderer;
 
 #[derive(Copy, Clone, Debug)]
@@ -39,27 +40,29 @@ pub struct Vertex2d {
 }
 implement_vertex!(Vertex2d, position);
 
-/// Creates a window using the glium crate
-pub fn run(window_parameters: WindowParameters, camera2d: Camera2d, scene: Scene) {
 
+/// Creates a window using the glium crate
+pub fn run(window_parameters: WindowParameters, camera2d: Camera2d, mut scene: Scene, player: u128)
+{
     let event_loop = winit::event_loop::EventLoopBuilder::new().build();
     let (_window, display) = glium::backend::glutin::SimpleWindowBuilder::new()
         .with_inner_size(window_parameters.width, window_parameters.height)
         .build(&event_loop);
 
-    let renderer = Renderer::new(display, camera2d);
+    let renderer = Renderer::new(display, &camera2d, &window_parameters.background_color);
 
-    let color = window_parameters.background_color.clone();
     let start = Instant::now();
     let mut last_time: f32 = 0.0;
-
-    let mut x_bat = 0.0;
     let mut num_frames = 0;
-    let bat_speed = 1.0;
-    let mut left_pressed = false;
-    let mut right_pressed = false;
 
-    event_loop.run(move |event, _, control_flow| {
+    event_loop.run(move |event, _ , control_flow| {
+
+        let time = start.elapsed().as_secs_f32();
+        let delta = time - last_time;
+        last_time = time;
+        num_frames += 1;
+
+        scene.update(time, delta);
 
         match event {
             winit::event::Event::WindowEvent { event, .. } => match event {
@@ -67,15 +70,18 @@ pub fn run(window_parameters: WindowParameters, camera2d: Camera2d, scene: Scene
                 winit::event::WindowEvent::Resized(window_size) => {
                     renderer.resize(window_size.into());
                 },
-                winit::event::WindowEvent::KeyboardInput { device_id, input, is_synthetic } => match input.virtual_keycode {
+                winit::event::WindowEvent::KeyboardInput { device_id: _device_id, input, is_synthetic: _is_synthetic } => match input.virtual_keycode {
                     None => (),
                     Some(key_code) => match key_code {
                         winit::event::VirtualKeyCode::Left => {
-                            left_pressed = if input.state == ElementState::Pressed { true } else { false }
+                            scene.on_event(player, Event::LeftInput(input.state));
                         },
                         winit::event::VirtualKeyCode::Right => {
-                            right_pressed = if input.state == ElementState::Pressed { true } else { false }
+                            scene.on_event(player, Event::RightInput(input.state));
                         },
+                        winit::event::VirtualKeyCode::Space => {
+                            scene.on_event(player, Event::FireInput(input.state));
+                        }
                         winit::event::VirtualKeyCode::Escape => {
                             control_flow.set_exit()
                         },
@@ -88,17 +94,9 @@ pub fn run(window_parameters: WindowParameters, camera2d: Camera2d, scene: Scene
                 _window.request_redraw();
             },
             winit::event::Event::RedrawRequested(_) => {
-                let time = start.elapsed().as_secs_f32();
-                let delta = time - last_time;
-                last_time = time;
-                num_frames += 1;
                 let fps: f32 = (num_frames as f32) / time;
-                if num_frames % 100 == 0 { println!("{fps} {time} {} {last_time}", bat_speed*delta); }
-
-                if left_pressed { x_bat -= bat_speed * delta; }
-                if right_pressed { x_bat += bat_speed * delta; }
-
-                renderer.render(&scene, &color, x_bat);
+                if num_frames % 100 == 0 { println!("FPS: {fps} {time}")};
+                renderer.render(&scene);
             }
             _ => (),
         };

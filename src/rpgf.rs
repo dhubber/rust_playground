@@ -57,13 +57,6 @@ pub fn run(window_parameters: WindowParameters, camera2d: Camera2d, mut scene: S
 
     event_loop.run(move |event, _ , control_flow| {
 
-        let time = start.elapsed().as_secs_f32();
-        let delta = time - last_time;
-        last_time = time;
-        num_frames += 1;
-
-        scene.update(time, delta);
-
         match event {
             winit::event::Event::WindowEvent { event, .. } => match event {
                 winit::event::WindowEvent::CloseRequested => control_flow.set_exit(),
@@ -90,12 +83,17 @@ pub fn run(window_parameters: WindowParameters, camera2d: Camera2d, mut scene: S
                 }
                 _ => (),
             },
-            winit::event::Event::RedrawEventsCleared => {
-                _window.request_redraw();
-            },
-            winit::event::Event::RedrawRequested(_) => {
+            winit::event::Event::MainEventsCleared => {
+                let time = start.elapsed().as_secs_f32();
+                let delta = time - last_time;
+                last_time = time;
+                num_frames += 1;
                 let fps: f32 = (num_frames as f32) / time;
                 if num_frames % 100 == 0 { println!("FPS: {fps} {time}")};
+                scene.update(time, delta);
+                _window.request_redraw();
+            }
+            winit::event::Event::RedrawRequested(_) => {
                 renderer.render(&scene);
             }
             _ => (),

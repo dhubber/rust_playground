@@ -49,14 +49,11 @@ impl GameObject for Bat {
     }
 
     fn update(&mut self, time: f32, delta_time: f32) {
-        println!("Updating: {time}");
         if self.left_pressed && !self.right_pressed {
             self.try_move_x(-delta_time * self.speed);
-            dbg!("Bat moves left");
         }
         else if self.right_pressed && !self.left_pressed {
             self.try_move_x(delta_time * self.speed);
-            dbg!("Bat moves right");
         }
     }
 

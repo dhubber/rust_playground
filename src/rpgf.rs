@@ -8,7 +8,6 @@ mod event;
 extern crate glium;
 extern crate glam;
 
-use std::rc::Rc;
 use glium::{implement_vertex, Surface};
 use std::time::Instant;
 pub use camera::Camera2d;

@@ -31,7 +31,9 @@ impl Scene {
 
     pub fn update(&mut self, time: f32, delta: f32) {
         for object in self.objects.values_mut() {
-            object.update(time, delta);
+            if object.is_active() {
+                object.update(time, delta);
+            }
         }
     }
 

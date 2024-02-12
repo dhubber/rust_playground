@@ -1,7 +1,7 @@
 use glam::Mat4;
 use glium::glutin::surface::WindowSurface;
 use glium::{Program, Surface, VertexBuffer};
-use crate::{Camera2d, Color4, Scene, Vertex2d};
+use crate::{Camera2d, Color4, GameObject, Scene, Vertex2d};
 
 pub struct Renderer {
     display: glium::Display<WindowSurface>,
@@ -67,7 +67,10 @@ impl Renderer {
         let mut frame = self.display.draw();
         frame.clear_color(self.background_color.r, self.background_color.g, self.background_color.b, self.background_color.a);
 
-        for object in scene.objects.values() {
+        for object in scene.objects.values(){
+            if !object.is_active() {
+                continue;
+            }
             let transform2d = object.transform2d();
             let renderable = object.renderable();
             let model_matrix = Mat4::from_cols_array_2d(

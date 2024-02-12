@@ -44,8 +44,14 @@ impl CollisionSolver {
         self.old_collision_set = self.new_collision_set.clone();
         self.new_collision_set.clear();
         for (id1, obj1) in scene.objects.iter() {
+            if !obj1.is_active() {
+                continue;
+            }
             let aab1 = obj1.aa_box();
             for (id2, obj2) in scene.objects.iter() {
+                if !obj2.is_active() {
+                    continue;
+                }
                 if id1 != id2 {
                     let aab2 = obj2.aa_box();
                     if AxisAlignedBox::overlap(&aab1, &aab2) {

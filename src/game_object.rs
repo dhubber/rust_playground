@@ -19,6 +19,7 @@ pub struct Renderable {
 }
 
 pub trait GameObject {
+    fn is_active(&self) -> bool { true }
     fn is_dirty(&self) -> bool { false }
     fn transform2d(&self) -> &Transform2d;
     fn renderable(&self) -> &Renderable;

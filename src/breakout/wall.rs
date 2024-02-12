@@ -25,11 +25,11 @@ impl Wall {
 }
 
 impl GameObject for Wall {
-    fn transform2d(&self) -> Transform2d {
-        self.transform2d
+    fn transform2d(&self) -> &Transform2d {
+        &self.transform2d
     }
 
-    fn renderable(&self) -> Renderable {
-        self.renderable
+    fn renderable(&self) -> &Renderable {
+        &self.renderable
     }
 }

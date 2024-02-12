@@ -67,7 +67,7 @@ impl Renderer {
         let mut frame = self.display.draw();
         frame.clear_color(self.background_color.r, self.background_color.g, self.background_color.b, self.background_color.a);
 
-        for (_id, object) in scene.objects.iter().clone() {
+        for object in scene.objects.values() {
             let transform2d = object.transform2d();
             let renderable = object.renderable();
             let model_matrix = Mat4::from_cols_array_2d(

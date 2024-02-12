@@ -3,6 +3,8 @@ mod game_object;
 mod scene;
 mod renderer;
 mod event;
+mod collision;
+mod aab;
 
 #[macro_use]
 extern crate glium;
@@ -14,6 +16,7 @@ pub use camera::Camera2d;
 pub use game_object::*;
 pub use scene::*;
 pub use event::{Event};
+use crate::collision::CollisionSolver;
 use crate::renderer::Renderer;
 
 #[derive(Copy, Clone, Debug)]
@@ -49,6 +52,7 @@ pub fn run(window_parameters: WindowParameters, camera2d: Camera2d, mut scene: S
         .build(&event_loop);
 
     let renderer = Renderer::new(display, &camera2d, &window_parameters.background_color);
+    let mut collision_solver = CollisionSolver::new();
 
     let start = Instant::now();
     let mut last_time: f32 = 0.0;
@@ -90,6 +94,7 @@ pub fn run(window_parameters: WindowParameters, camera2d: Camera2d, mut scene: S
                 let fps: f32 = (num_frames as f32) / time;
                 if num_frames % 100 == 0 { println!("FPS: {fps} {time}")};
                 scene.update(time, delta);
+                collision_solver.solve(&mut scene);
                 _window.request_redraw();
             }
             winit::event::Event::RedrawRequested(_) => {

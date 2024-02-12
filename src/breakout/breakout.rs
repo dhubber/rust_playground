@@ -1,9 +1,9 @@
 mod bat;
 mod wall;
+mod ball;
 
-use std::rc::Rc;
-use winit::event::ElementState::Pressed;
 use rpgf::{Camera2d, Color4, Event, GameObject, Renderable, Scene, Transform2d, WindowParameters};
+use crate::ball::Ball;
 use crate::bat::Bat;
 use crate::wall::{Wall, WALL_THICKNESS};
 
@@ -30,7 +30,10 @@ fn main() {
 
     let mut scene = Scene::new("breakout".to_string());
 
-    let bat_id = scene.add_to_scene(Box::new(Bat::new()));
+    let bat_id= scene.add_to_scene(Box::new(Bat::new()));
+
+    let ball_id = scene.add_to_scene(Box::new(Ball::new(bat_id)));
+
     let left_wall_id = scene.add_to_scene(Box::new(
         Wall::new([0.5*(WALL_THICKNESS - LEVEL_WIDTH), 0.0], [WALL_THICKNESS, LEVEL_HEIGHT])
     ));

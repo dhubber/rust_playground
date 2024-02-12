@@ -60,7 +60,7 @@ impl GameObject for Bat {
         &self.renderable
     }
 
-    fn update(&mut self, time: f32, delta_time: f32) {
+    fn update(&mut self, _time: f32, delta_time: f32) {
         self.dirty = false;
         if self.left_pressed && !self.right_pressed {
             self.try_move_x(-delta_time * self.speed);
@@ -77,9 +77,6 @@ impl GameObject for Bat {
             }
             Event::RightInput(state) => {
                 self.right_pressed = if state == Pressed { true } else { false };
-            }
-            Event::FireInput(state) => {
-                dbg!("Bat fires");
             }
             _ => ()
         }

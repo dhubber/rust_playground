@@ -3,7 +3,7 @@ mod wall;
 mod ball;
 mod brick;
 
-use rpgf::{Camera2d, Color4, Event, GameObject, Renderable, Scene, Transform2d, WindowParameters};
+use rpgf::{Camera2d, Color4, Scene, WindowParameters};
 use crate::ball::Ball;
 use crate::bat::Bat;
 use crate::brick::{Brick, BRICK_SPACING};
@@ -35,25 +35,26 @@ fn main() {
 
     let bat_id = scene.add_to_scene(Box::new(Bat::new()));
 
-    let ball_id = scene.add_to_scene(Box::new(Ball::new(bat_id)));
+    let _ball_id = scene.add_to_scene(Box::new(Ball::new(bat_id)));
 
-    let left_wall_id = scene.add_to_scene(Box::new(
+    let _left_wall_id = scene.add_to_scene(Box::new(
         Wall::new([0.5 * (WALL_THICKNESS - LEVEL_WIDTH), 0.0], [WALL_THICKNESS, LEVEL_HEIGHT])
     ));
-    let right_wall_id = scene.add_to_scene(Box::new(
+    let _right_wall_id = scene.add_to_scene(Box::new(
         Wall::new([0.5 * (LEVEL_WIDTH - WALL_THICKNESS), 0.0], [WALL_THICKNESS, LEVEL_HEIGHT])
     ));
-    let top_wall_id = scene.add_to_scene(Box::new(
+    let _top_wall_id = scene.add_to_scene(Box::new(
         Wall::new([0.0, 0.5 * (LEVEL_HEIGHT - WALL_THICKNESS)], [LEVEL_WIDTH - 2.0 * WALL_THICKNESS, WALL_THICKNESS])
     ));
 
-    for j in (0..NUM_BRICKS[1]) {
+    for j in 0..NUM_BRICKS[1] {
         let y = (0.5 * LEVEL_HEIGHT) - WALL_THICKNESS - (((j + 2) as f32) * BRICK_SPACING[1]);
-        for i in (0..NUM_BRICKS[0]) {
+        for i in 0..NUM_BRICKS[0] {
             let x = ((i as f32) - 0.5 * (NUM_BRICKS[0] as f32) + 0.5) * BRICK_SPACING[0];
-            let brick = scene.add_to_scene(Box::new(Brick::new([x, y])));
+            let _brick_id = scene.add_to_scene(Box::new(Brick::new([x, y])));
             println!("{x} {y}");
         }
     }
+
     rpgf::run(window_parameters, camera2d, scene, bat_id);
 }

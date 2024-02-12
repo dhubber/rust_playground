@@ -1,4 +1,4 @@
-use rpgf::{Color4, Event, GameObject, Renderable, Transform2d};
+use rpgf::{Event, GameObject, Renderable, Transform2d};
 
 pub const BRICK_SIZE: [f32; 2] = [0.095, 0.06];
 pub const BRICK_SPACING: [f32; 2] = [0.1, 0.065];
@@ -40,7 +40,7 @@ impl GameObject for Brick {
 
     fn on_event(&mut self, event: Event) {
         match event {
-            Event::OnCollisionEnter{id, other, aab1, aab2 } => {
+            Event::OnCollisionEnter{..} => {
                 self.num_hits += 1;
                 if self.num_hits == 1 {
                     self.renderable.color = BRICK_COLOR_2

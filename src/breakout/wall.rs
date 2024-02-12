@@ -1,6 +1,4 @@
-use winit::event::ElementState::Pressed;
-use rpgf::{Color4, Event, GameObject, Renderable, Transform2d};
-use crate::START_POSITION;
+use rpgf::{GameObject, Renderable, Transform2d};
 
 pub const WALL_THICKNESS: f32 = 0.025;
 pub const WALL_COLOR: [f32; 4] = [0.4, 0.5, 0.6, 1.0];

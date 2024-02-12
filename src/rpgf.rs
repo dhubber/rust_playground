@@ -10,7 +10,7 @@ mod aab;
 extern crate glium;
 extern crate glam;
 
-use glium::{implement_vertex, Surface};
+use glium::{implement_vertex};
 use std::time::Instant;
 pub use camera::Camera2d;
 pub use game_object::*;

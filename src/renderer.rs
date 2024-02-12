@@ -1,7 +1,7 @@
 use glam::Mat4;
 use glium::glutin::surface::WindowSurface;
 use glium::{Program, Surface, VertexBuffer};
-use crate::{Camera2d, Color4, GameObject, Scene, Vertex2d};
+use crate::{Camera2d, Color4, Scene, Vertex2d};
 
 pub struct Renderer {
     display: glium::Display<WindowSurface>,

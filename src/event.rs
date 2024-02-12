@@ -3,6 +3,10 @@ use crate::aab::AxisAlignedBox;
 
 pub enum Event {
     Quit,
+    PlayerWins,
+    PlayerLoses,
+    BrickDestroyed,
+    BallOutOfBounds,
     LeftInput(ElementState),
     RightInput(ElementState),
     FireInput(ElementState),

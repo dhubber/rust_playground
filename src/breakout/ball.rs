@@ -1,4 +1,3 @@
-use std::cmp::min;
 use rpgf::{Event, GameObject, Renderable, Transform2d};
 use crate::bat::BAT_SIZE;
 use crate::START_POSITION;
@@ -55,9 +54,7 @@ impl GameObject for Ball {
 
     fn on_event(&mut self, event: Event) {
         match event {
-            Event::FireInput(state) => {
-            }
-            Event::OnCollisionEnter{id, other, aab1, aab2 } => {
+            Event::OnCollisionEnter{other, aab1, aab2, .. } => {
                 if other == self.bat_id {
                     if self.direction[1] < 0.0 {
                         self.speed += BALL_ACCEL;
@@ -73,10 +70,10 @@ impl GameObject for Ball {
                     let diff = [brick_pos[0] - self.transform2d.position[0], brick_pos[1] - self.transform2d.position[1]];
                     let overlap = [(aab2.max[0] - aab1.min[0]).min(aab1.max[0] - aab2.min[0]),
                         (aab2.max[1] - aab1.min[1]).min(aab1.max[1] - aab2.min[1])];
-                    if (overlap[1].abs() > overlap[0].abs() && self.direction[0]*diff[0] > 0.0) {
+                    if overlap[1].abs() > overlap[0].abs() && self.direction[0]*diff[0] > 0.0 {
                         self.direction[0] = - self.direction[0];
                     }
-                    if (overlap[0].abs() > overlap[1].abs() && self.direction[1]*diff[1] > 0.0) {
+                    if overlap[0].abs() > overlap[1].abs() && self.direction[1]*diff[1] > 0.0 {
                         self.direction[1] = - self.direction[1];
                     }
                 }

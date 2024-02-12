@@ -54,7 +54,7 @@ impl CollisionSolver {
                 }
                 if id1 != id2 {
                     let aab2 = obj2.aa_box();
-                    if AxisAlignedBox::overlap(&aab1, &aab2) {
+                    if AxisAlignedBox::is_overlapping(&aab1, &aab2) {
                         self.new_collision_set.insert(Collision{ obj1: id1.clone(), obj2: id2.clone(), aab1, aab2 });
                     }
                 }

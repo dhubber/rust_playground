@@ -1,3 +1,4 @@
+use std::cmp::min;
 use rpgf::{Event, GameObject, Renderable, Transform2d};
 use crate::bat::BAT_SIZE;
 use crate::START_POSITION;
@@ -68,13 +69,15 @@ impl GameObject for Ball {
                     }
                 }
                 else {
-                    if (aab1.max[0] > aab2.min[0] && aab1.min[0] < aab2.min[0]) ||
-                        (aab1.min[0] < aab2.max[0] && aab1.max[0] > aab2.max[0]) {
-                        self.direction[0] *= -1.0;
+                    let brick_pos = aab2.centre();
+                    let diff = [brick_pos[0] - self.transform2d.position[0], brick_pos[1] - self.transform2d.position[1]];
+                    let overlap = [(aab2.max[0] - aab1.min[0]).min(aab1.max[0] - aab2.min[0]),
+                        (aab2.max[1] - aab1.min[1]).min(aab1.max[1] - aab2.min[1])];
+                    if (overlap[1].abs() > overlap[0].abs() && self.direction[0]*diff[0] > 0.0) {
+                        self.direction[0] = - self.direction[0];
                     }
-                    if (aab1.max[1] > aab2.min[1] && aab1.min[1] < aab2.min[1]) ||
-                        (aab1.min[1] < aab2.max[1] && aab1.max[1] > aab2.max[1]) {
-                        self.direction[1] *= -1.0;
+                    if (overlap[0].abs() > overlap[1].abs() && self.direction[1]*diff[1] > 0.0) {
+                        self.direction[1] = - self.direction[1];
                     }
                 }
             }

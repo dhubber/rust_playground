@@ -11,7 +11,11 @@ impl PartialEq<Self> for AxisAlignedBox {
 }
 
 impl AxisAlignedBox {
-    pub fn overlap(aab1: &AxisAlignedBox, aab2: &AxisAlignedBox) -> bool {
+    pub fn centre(&self) -> [f32; 2] {
+        [0.5*(self.min[0] + self.max[0]), 0.5*(self.min[1] + self.max[1])]
+    }
+
+    pub fn is_overlapping(aab1: &AxisAlignedBox, aab2: &AxisAlignedBox) -> bool {
         if aab1.min[0] > aab2.max[0] { return false; }
         if aab2.min[0] > aab1.max[0] { return false; }
         if aab1.min[1] > aab2.max[1] { return false; }

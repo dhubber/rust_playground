@@ -5,6 +5,7 @@ mod renderer;
 mod event;
 mod collision;
 mod aab;
+mod game;
 
 #[macro_use]
 extern crate glium;
@@ -17,6 +18,7 @@ pub use game_object::*;
 pub use scene::*;
 pub use event::{Event};
 use crate::collision::CollisionSolver;
+pub use crate::game::Game;
 use crate::renderer::Renderer;
 
 #[derive(Copy, Clone, Debug)]
@@ -44,7 +46,10 @@ implement_vertex!(Vertex2d, position);
 
 
 /// Creates a window using the glium crate
-pub fn run(window_parameters: WindowParameters, camera2d: Camera2d, mut scene: Scene, player: u128)
+pub fn run(window_parameters: WindowParameters,
+           camera2d: Camera2d,
+           mut game: Box<dyn Game>
+)
 {
     let event_loop = winit::event_loop::EventLoopBuilder::new().build();
     let (_window, display) = glium::backend::glutin::SimpleWindowBuilder::new()
@@ -70,13 +75,13 @@ pub fn run(window_parameters: WindowParameters, camera2d: Camera2d, mut scene: S
                     None => (),
                     Some(key_code) => match key_code {
                         winit::event::VirtualKeyCode::Left => {
-                            scene.on_event(player, Event::LeftInput(input.state));
+                            game.on_event(game.player_id(), Event::LeftInput(input.state));
                         },
                         winit::event::VirtualKeyCode::Right => {
-                            scene.on_event(player, Event::RightInput(input.state));
+                            game.on_event(game.player_id(), Event::RightInput(input.state));
                         },
                         winit::event::VirtualKeyCode::Space => {
-                            scene.on_event(player, Event::FireInput(input.state));
+                            game.on_event(game.player_id(), Event::FireInput(input.state));
                         }
                         winit::event::VirtualKeyCode::Escape => {
                             control_flow.set_exit()
@@ -93,12 +98,12 @@ pub fn run(window_parameters: WindowParameters, camera2d: Camera2d, mut scene: S
                 num_frames += 1;
                 let fps: f32 = (num_frames as f32) / time;
                 if num_frames % 100 == 0 { println!("FPS: {fps} {time}")};
-                scene.update(time, delta);
-                collision_solver.solve(&mut scene);
+                game.update(time, delta);
+                collision_solver.solve(&mut game);
                 _window.request_redraw();
             }
             winit::event::Event::RedrawRequested(_) => {
-                renderer.render(&scene);
+                renderer.render(&game.scene());
             }
             _ => (),
         };

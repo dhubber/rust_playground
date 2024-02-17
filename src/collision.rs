@@ -2,6 +2,7 @@ use std::collections::HashSet;
 use std::hash::{Hash, Hasher};
 use crate::aab::AxisAlignedBox;
 use crate::Event;
+use crate::game::Game;
 pub use crate::Scene;
 
 #[derive(Copy, Clone, Debug)]
@@ -40,7 +41,8 @@ impl CollisionSolver {
         }
     }
 
-    pub fn solve(&mut self, scene: &mut Scene) {
+    pub fn solve(&mut self, game: &mut Box<dyn Game>) {
+        let scene: &Scene = game.scene();
         self.old_collision_set = self.new_collision_set.clone();
         self.new_collision_set.clear();
         for (id1, obj1) in scene.objects.iter() {
@@ -63,12 +65,12 @@ impl CollisionSolver {
 
         let diff1 = self.old_collision_set.difference(&self.new_collision_set);
         for a in diff1 {
-            scene.on_event(a.obj1, Event::OnCollisionExit { id: a.obj1, other: a.obj2, aab1: a.aab1, aab2: a.aab2 });
+            game.on_event(a.obj1, Event::OnCollisionExit { id: a.obj1, other: a.obj2, aab1: a.aab1, aab2: a.aab2 });
         }
 
         let diff2 = self.new_collision_set.difference(&self.old_collision_set);
         for a in diff2 {
-            scene.on_event(a.obj1, Event::OnCollisionEnter { id: a.obj1, other: a.obj2, aab1: a.aab1, aab2: a.aab2 });
+            game.on_event(a.obj1, Event::OnCollisionEnter { id: a.obj1, other: a.obj2, aab1: a.aab1, aab2: a.aab2 });
         }
     }
 }

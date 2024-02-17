@@ -1,3 +1,4 @@
+use glium::buffer::BufferMode::Default;
 use winit::event::ElementState::Pressed;
 use rpgf::{Event, GameObject, Renderable, Transform2d};
 use crate::{LEVEL_WIDTH, START_POSITION};
@@ -34,6 +35,7 @@ impl Bat {
             left_pressed: false,
             right_pressed: false,
             dirty: false,
+            id: 0
         }
     }
 
@@ -65,10 +67,12 @@ impl GameObject for Bat {
         self.dirty = false;
         if self.left_pressed && !self.right_pressed {
             self.try_move_x(-delta_time * self.speed);
-            Some(Event::MoveToPosition {id: self.id, position: self.transform2d.position})
         }
         else if self.right_pressed && !self.left_pressed {
             self.try_move_x(delta_time * self.speed);
+        }
+        if self.dirty {
+            return Some(Event::MoveToPosition {id: self.id, position: self.transform2d.position})
         }
         None
     }

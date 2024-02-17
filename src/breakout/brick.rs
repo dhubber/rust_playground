@@ -38,15 +38,19 @@ impl GameObject for Brick {
         &self.renderable
     }
 
-    fn on_event(&mut self, event: Event) {
+    fn on_event(&mut self, event: Event) -> Option<Event> {
         match event {
             Event::OnCollisionEnter{..} => {
                 self.num_hits += 1;
                 if self.num_hits == 1 {
                     self.renderable.color = BRICK_COLOR_2
                 }
+                if self.num_hits == 2 {
+                    return Some(Event::BrickDestroyed)
+                }
             }
             _ => ()
         }
+        None
     }
 }

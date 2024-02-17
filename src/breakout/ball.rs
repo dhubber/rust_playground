@@ -42,7 +42,7 @@ impl GameObject for Ball {
         &self.renderable
     }
 
-    fn update(&mut self, _time: f32, delta_time: f32) {
+    fn update(&mut self, _time: f32, delta_time: f32) -> Option<Event> {
         let dist = self.speed * delta_time;
         let new_position = [self.transform2d.position[0] + dist * self.direction[0],
             self.transform2d.position[1] + dist * self.direction[1]];
@@ -50,9 +50,10 @@ impl GameObject for Ball {
             position: new_position,
             scale: self.transform2d.scale
         };
+        None
     }
 
-    fn on_event(&mut self, event: Event) {
+    fn on_event(&mut self, event: Event) -> Option<Event> {
         match event {
             Event::OnCollisionEnter{other, aab1, aab2, .. } => {
                 if other == self.bat_id {
@@ -77,8 +78,9 @@ impl GameObject for Ball {
                         self.direction[1] = - self.direction[1];
                     }
                 }
+                Some(Event::PlayAudio)
             }
-            _ => ()
+            _ => None
         }
     }
 }

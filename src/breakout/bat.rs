@@ -14,7 +14,8 @@ pub struct Bat {
     speed: f32,
     left_pressed: bool,
     right_pressed: bool,
-    dirty: bool
+    dirty: bool,
+    id: u128
 }
 
 impl Bat {
@@ -60,17 +61,19 @@ impl GameObject for Bat {
         &self.renderable
     }
 
-    fn update(&mut self, _time: f32, delta_time: f32) {
+    fn update(&mut self, _time: f32, delta_time: f32) -> Option<Event>  {
         self.dirty = false;
         if self.left_pressed && !self.right_pressed {
             self.try_move_x(-delta_time * self.speed);
+            Some(Event::MoveToPosition {id: self.id, position: self.transform2d.position})
         }
         else if self.right_pressed && !self.left_pressed {
             self.try_move_x(delta_time * self.speed);
         }
+        None
     }
 
-    fn on_event(&mut self, event: Event) {
+    fn on_event(&mut self, event: Event) -> Option<Event> {
         match event {
             Event::LeftInput(state) => {
                 self.left_pressed = if state == Pressed { true } else { false };
@@ -80,5 +83,6 @@ impl GameObject for Bat {
             }
             _ => ()
         }
+        None
     }
 }

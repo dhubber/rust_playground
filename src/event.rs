@@ -12,5 +12,6 @@ pub enum Event {
     FireInput(ElementState),
     OnCollisionEnter {id: u128, other: u128, aab1: AxisAlignedBox, aab2: AxisAlignedBox},
     OnCollisionExit {id: u128, other: u128, aab1: AxisAlignedBox, aab2: AxisAlignedBox},
-    MoveToPosition {id: u128, other: u128, position: [f32; 2]}
+    MoveToPosition {id: u128, position: [f32; 2]},
+    PlayAudio,
 }

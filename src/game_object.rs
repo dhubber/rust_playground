@@ -21,6 +21,7 @@ pub struct Renderable {
 pub trait GameObject {
     fn is_active(&self) -> bool { true }
     fn is_dirty(&self) -> bool { false }
+    fn set_id(&self, id: u128) {}
     fn transform2d(&self) -> &Transform2d;
     fn renderable(&self) -> &Renderable;
     fn aa_box(&self) -> AxisAlignedBox {
@@ -30,6 +31,6 @@ pub trait GameObject {
             max: [transform2d.position[0] + 0.5*transform2d.scale[0], transform2d.position[1] + 0.5*transform2d.scale[1]],
         }
     }
-    fn update(&mut self, _time: f32, _delta_time: f32) {}
-    fn on_event(&mut self, _event: Event) {}
+    fn update(&mut self, _time: f32, _delta_time: f32) -> Option<Event> { None }
+    fn on_event(&mut self, _event: Event) -> Option<Event> { None }
 }

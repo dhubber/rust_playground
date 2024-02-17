@@ -17,6 +17,7 @@ impl Scene {
 
     pub fn add_to_scene(&mut self, object: Box<dyn GameObject>) -> u128 {
         let id: u128 = self.generate_id();
+        object.set_id(id);
         self.objects.insert(id, object);
         id
     }

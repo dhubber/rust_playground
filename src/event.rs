@@ -1,6 +1,7 @@
 use winit::event::ElementState;
 use crate::aab::AxisAlignedBox;
 
+#[derive(Debug)]
 pub enum Event {
     Quit,
     PlayerWins,

@@ -97,7 +97,10 @@ pub fn run(window_parameters: WindowParameters,
                 last_time = time;
                 num_frames += 1;
                 let fps: f32 = (num_frames as f32) / time;
-                if num_frames % 100 == 0 { println!("FPS: {fps} {time}")};
+                if num_frames % 100 == 0 {
+                    println!("FPS: {fps} {time}");
+                    game.console_log();
+                };
                 game.update(time, delta);
                 collision_solver.solve(&mut game);
                 _window.request_redraw();

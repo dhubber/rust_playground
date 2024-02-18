@@ -38,12 +38,12 @@ impl Scene {
         }
     }
 
-    pub fn on_event(&mut self, id: u128, event: Event) {
+    pub fn on_event(&mut self, id: u128, event: Event) -> Option<Event> {
         let object = self.find_object_mut(&id);
         match object {
-            None => {}
+            None => { None }
             Some(obj) => {
-                obj.on_event(event);
+                obj.on_event(event)
             }
         }
     }

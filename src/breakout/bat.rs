@@ -1,6 +1,6 @@
 use glium::buffer::BufferMode::Default;
 use winit::event::ElementState::Pressed;
-use rpgf::{Event, GameObject, Renderable, Transform2d};
+use rpgf::{Event, EventType, GameObject, Renderable, Transform2d};
 use crate::{LEVEL_WIDTH, START_POSITION};
 use crate::wall::WALL_THICKNESS;
 
@@ -63,7 +63,7 @@ impl GameObject for Bat {
         &self.renderable
     }
 
-    fn update(&mut self, _time: f32, delta_time: f32) -> Option<Event>  {
+    fn update(&mut self, _time: f32, delta_time: f32) -> Option<Vec<Event>>  {
         self.dirty = false;
         if self.left_pressed && !self.right_pressed {
             self.try_move_x(-delta_time * self.speed);
@@ -72,17 +72,17 @@ impl GameObject for Bat {
             self.try_move_x(delta_time * self.speed);
         }
         if self.dirty {
-            return Some(Event::MoveToPosition {id: self.id, position: self.transform2d.position})
+            return Some(vec![Event { id: self.id, event_type: EventType::MoveToPosition {id: self.id, position: self.transform2d.position}}])
         }
         None
     }
 
-    fn on_event(&mut self, event: Event) -> Option<Event> {
-        match event {
-            Event::LeftInput(state) => {
+    fn on_event(&mut self, event: &Event) -> Option<Vec<Event>> {
+        match event.event_type {
+            EventType::LeftInput(state) => {
                 self.left_pressed = if state == Pressed { true } else { false };
             }
-            Event::RightInput(state) => {
+            EventType::RightInput(state) => {
                 self.right_pressed = if state == Pressed { true } else { false };
             }
             _ => ()

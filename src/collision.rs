@@ -1,8 +1,9 @@
 use std::collections::HashSet;
 use std::hash::{Hash, Hasher};
 use crate::aab::AxisAlignedBox;
-use crate::Event;
-use crate::game::Game;
+use crate::{Event, EventType};
+use crate::event::EventListener;
+use crate::game::{Game, SceneUpdate};
 pub use crate::Scene;
 
 #[derive(Copy, Clone, Debug)]
@@ -40,9 +41,10 @@ impl CollisionSolver {
             new_collision_set: HashSet::new(),
         }
     }
+}
 
-    pub fn solve(&mut self, game: &mut Box<dyn Game>) {
-        let scene: &Scene = game.scene();
+impl SceneUpdate for CollisionSolver {
+    fn update(&mut self, scene: &Scene, _time: f32, _delta_time: f32) -> Option<Vec<Event>> {
         self.old_collision_set = self.new_collision_set.clone();
         self.new_collision_set.clear();
         for (id1, obj1) in scene.objects.iter() {
@@ -63,14 +65,30 @@ impl CollisionSolver {
             }
         }
 
+        // Create list of collision events to be broadcast to all listeners
+        let mut event_queue: Vec<Event> = Vec::new();
+
         let diff1 = self.old_collision_set.difference(&self.new_collision_set);
         for a in diff1 {
-            game.on_event(a.obj1, Event::OnCollisionExit { id: a.obj1, other: a.obj2, aab1: a.aab1, aab2: a.aab2 });
+            event_queue.push(Event {
+                id: a.obj1,
+                event_type: EventType::OnCollisionExit { id: a.obj1, other: a.obj2, aab1: a.aab1, aab2: a.aab2 }
+            });
         }
 
         let diff2 = self.new_collision_set.difference(&self.old_collision_set);
         for a in diff2 {
-            game.on_event(a.obj1, Event::OnCollisionEnter { id: a.obj1, other: a.obj2, aab1: a.aab1, aab2: a.aab2 });
+            event_queue.push(Event {
+                id: a.obj1,
+                event_type: EventType::OnCollisionEnter { id: a.obj1, other: a.obj2, aab1: a.aab1, aab2: a.aab2 }
+            });
         }
+        Some(event_queue)
+    }
+}
+
+impl EventListener for CollisionSolver {
+    fn on_event(&mut self, event: &Event) -> Option<Vec<Event>> {
+        None
     }
 }

@@ -1,7 +1,9 @@
 use glam::Mat4;
 use glium::glutin::surface::WindowSurface;
 use glium::{Program, Surface, VertexBuffer};
-use crate::{Camera2d, Color4, Scene, Vertex2d};
+use crate::{Camera2d, Color4, Event, Scene, Vertex2d};
+use crate::event::EventListener;
+use crate::game::SceneUpdate;
 
 pub struct Renderer {
     display: glium::Display<WindowSurface>,
@@ -16,12 +18,12 @@ pub struct Renderer {
 impl Renderer {
     pub fn new(display: glium::Display<WindowSurface>, camera2d: &Camera2d, background_color: &Color4) -> Self {
         let rectangle_vertex_data = vec![
-            Vertex2d{ position: [-0.5, -0.5]},
-            Vertex2d{ position: [0.5, -0.5]},
-            Vertex2d{ position: [0.5, 0.5]},
-            Vertex2d{ position: [-0.5, -0.5]},
-            Vertex2d{ position: [0.5, 0.5]},
-            Vertex2d{ position: [-0.5, 0.5]},
+            Vertex2d { position: [-0.5, -0.5] },
+            Vertex2d { position: [0.5, -0.5] },
+            Vertex2d { position: [0.5, 0.5] },
+            Vertex2d { position: [-0.5, -0.5] },
+            Vertex2d { position: [0.5, 0.5] },
+            Vertex2d { position: [-0.5, 0.5] },
         ];
 
         let vertex_shader_src = r#"
@@ -63,7 +65,14 @@ impl Renderer {
         }
     }
 
-    pub fn render(&self, scene: &Scene) {
+    pub fn resize(&self, new_size:(u32, u32)) {
+        self.display.resize(new_size);
+    }
+}
+
+impl SceneUpdate for Renderer {
+
+    fn update(&mut self, scene: &Scene, time: f32, delta_time: f32) -> Option<Vec<Event>> {
         let mut frame = self.display.draw();
         frame.clear_color(self.background_color.r, self.background_color.g, self.background_color.b, self.background_color.a);
 
@@ -92,9 +101,12 @@ impl Renderer {
                        &Default::default()).unwrap();
         }
         frame.finish().unwrap();
+        None
     }
+}
 
-    pub fn resize(&self, new_size:(u32, u32)) {
-        self.display.resize(new_size);
+impl EventListener for Renderer {
+    fn on_event(&mut self, event: &Event) -> Option<Vec<Event>> {
+        None
     }
 }

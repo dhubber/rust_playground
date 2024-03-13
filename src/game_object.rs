@@ -31,6 +31,6 @@ pub trait GameObject {
             max: [transform2d.position[0] + 0.5*transform2d.scale[0], transform2d.position[1] + 0.5*transform2d.scale[1]],
         }
     }
-    fn update(&mut self, _time: f32, _delta_time: f32) -> Option<Event> { None }
-    fn on_event(&mut self, _event: Event) -> Option<Event> { None }
+    fn update(&mut self, _time: f32, _delta_time: f32) -> Option<Vec<Event>> { None }
+    fn on_event(&mut self, _event: &Event) -> Option<Vec<Event>> { None }
 }

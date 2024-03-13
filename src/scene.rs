@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 use rand::prelude::*;
-use crate::{Event, GameObject};
+use crate::{Event, EventListener, GameObject};
 
 pub struct Scene {
     pub name: String,
@@ -38,18 +38,20 @@ impl Scene {
         }
     }
 
-    pub fn on_event(&mut self, id: u128, event: Event) -> Option<Event> {
-        let object = self.find_object_mut(&id);
+    fn generate_id(&self) -> u128 {
+        let mut rng = rand::thread_rng();
+        rng.gen()
+    }
+}
+
+impl EventListener for Scene {
+    fn on_event(&mut self, event: &Event) -> Option<Vec<Event>> {
+        let object = self.find_object_mut(&event.id);
         match object {
             None => { None }
             Some(obj) => {
                 obj.on_event(event)
             }
         }
-    }
-
-    fn generate_id(&self) -> u128 {
-        let mut rng = rand::thread_rng();
-        rng.gen()
     }
 }

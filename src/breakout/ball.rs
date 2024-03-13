@@ -1,4 +1,4 @@
-use rpgf::{Event, GameObject, Renderable, Transform2d};
+use rpgf::{Event, EventType, GameObject, Renderable, Transform2d};
 use crate::bat::BAT_SIZE;
 use crate::START_POSITION;
 
@@ -42,7 +42,7 @@ impl GameObject for Ball {
         &self.renderable
     }
 
-    fn update(&mut self, _time: f32, delta_time: f32) -> Option<Event> {
+    fn update(&mut self, _time: f32, delta_time: f32) -> Option<Vec<Event>> {
         let dist = self.speed * delta_time;
         let new_position = [self.transform2d.position[0] + dist * self.direction[0],
             self.transform2d.position[1] + dist * self.direction[1]];
@@ -53,9 +53,9 @@ impl GameObject for Ball {
         None
     }
 
-    fn on_event(&mut self, event: Event) -> Option<Event> {
-        match event {
-            Event::OnCollisionEnter{other, aab1, aab2, .. } => {
+    fn on_event(&mut self, event: &Event) -> Option<Vec<Event>> {
+        match event.event_type {
+            EventType::OnCollisionEnter{id, other, aab1, aab2} => {
                 if other == self.bat_id {
                     if self.direction[1] < 0.0 {
                         self.speed += BALL_ACCEL;
@@ -78,7 +78,7 @@ impl GameObject for Ball {
                         self.direction[1] = - self.direction[1];
                     }
                 }
-                Some(Event::PlayAudio)
+                Some(vec![Event { id: 0, event_type: EventType::PlayAudio}])
             }
             _ => None
         }

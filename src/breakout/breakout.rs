@@ -3,7 +3,7 @@ mod wall;
 mod ball;
 mod brick;
 
-use rpgf::{Camera2d, Color4, Event, Game, Scene, WindowParameters};
+use rpgf::{Camera2d, Color4, Event, EventListener, EventType, Game, Scene, WindowParameters};
 use crate::ball::Ball;
 use crate::bat::Bat;
 use crate::BreakoutGameState::{Playing, Victory};
@@ -66,29 +66,29 @@ impl Game for Breakout {
         self.scene.update(time, delta_time);
     }
 
-    fn on_event(&mut self, id: u128, event: Event) {
-        //println!("Event: {:?}    id : {id}", event);
-        match event {
-            Event::BrickDestroyed => {
-                self.num_bricks -= 1;
-                if self.num_bricks == 0 {
-                    self.change_state(Victory);
-                }
-            }
-            _ => {
-                if let Some(optional_event) = self.scene.on_event(id, event) {
-                    self.on_event(id, optional_event);
-                }
-            }
-        }
-    }
-
     fn player_id(&self) -> u128 {
         self.bat_id
     }
 
     fn console_log(&self) {
         println!("Num Bricks: {}    State: {:?}", self.num_bricks, self.state);
+    }
+}
+
+impl EventListener for Breakout {
+    fn on_event(&mut self, event: &Event) -> Option<Vec<Event>> {
+        match event.event_type {
+            EventType::BrickDestroyed => {
+                self.num_bricks -= 1;
+                if self.num_bricks == 0 {
+                    self.change_state(Victory);
+                    return Some(vec![Event{ id: 0, event_type: EventType::PlayerWins }])
+                }
+                println!("Num bricks: {}    State: {:?}", self.num_bricks, self.state);
+            }
+            _ => ()
+        }
+        None
     }
 }
 

@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 use rand::prelude::*;
-use crate::{Event, EventListener, GameObject};
+use crate::{Event, EventListener, GameObject, Update};
 
 pub struct Scene {
     pub name: String,
@@ -30,17 +30,20 @@ impl Scene {
         self.objects.get_mut(id)
     }
 
-    pub fn update(&mut self, time: f32, delta: f32) {
+    fn generate_id(&self) -> u128 {
+        let mut rng = rand::thread_rng();
+        rng.gen()
+    }
+}
+
+impl Update for Scene {
+    fn update(&mut self, time: f32, delta: f32) -> Option<Vec<Event>> {
         for object in self.objects.values_mut() {
             if object.is_active() {
                 object.update(time, delta);
             }
         }
-    }
-
-    fn generate_id(&self) -> u128 {
-        let mut rng = rand::thread_rng();
-        rng.gen()
+        None
     }
 }
 

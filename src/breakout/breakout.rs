@@ -3,7 +3,7 @@ mod wall;
 mod ball;
 mod brick;
 
-use rpgf::{Camera2d, Color4, Event, EventListener, EventType, Game, Scene, WindowParameters};
+use rpgf::{Camera2d, Color4, Event, EventListener, EventType, Game, Scene, SceneUpdate, Update, WindowParameters};
 use crate::ball::Ball;
 use crate::bat::Bat;
 use crate::BreakoutGameState::{Playing, Victory};
@@ -24,16 +24,24 @@ pub enum BreakoutGameState {
 }
 
 pub struct Breakout {
-    scene: Scene,
     state: BreakoutGameState,
     num_bricks: u32,
     bat_id: u128,
+    scene: Scene,
 }
 
 impl Game for Breakout {
 
+    fn new() -> Self {
+        Breakout {
+            state: BreakoutGameState::Setup,
+            num_bricks: NUM_BRICKS[0] * NUM_BRICKS[1],
+            bat_id: 0,
+            scene: Scene::new("breakout".to_string())
+        }
+    }
+
     fn setup(&mut self) {
-        self.scene = Scene::new("breakout".to_string());
         self.bat_id = self.scene.add_to_scene(Box::new(Bat::new()));
         let _ball_id = self.scene.add_to_scene(Box::new(Ball::new(self.bat_id)));
         let _left_wall_id = self.scene.add_to_scene(Box::new(
@@ -54,30 +62,27 @@ impl Game for Breakout {
                 println!("{x} {y}");
             }
         }
-
-        self.num_bricks = NUM_BRICKS[0] * NUM_BRICKS[1];
     }
 
     fn scene(&self) -> &Scene {
         &self.scene
     }
 
-    fn update(&mut self, time: f32, delta_time: f32) {
-        self.scene.update(time, delta_time);
-    }
-
     fn player_id(&self) -> u128 {
         self.bat_id
     }
+}
 
-    fn console_log(&self) {
-        println!("Num Bricks: {}    State: {:?}", self.num_bricks, self.state);
+impl Update for Breakout {
+    fn update(&mut self, time: f32, delta_time: f32) -> Option<Vec<Event>> {
+        self.scene.update(time, delta_time)
     }
 }
 
 impl EventListener for Breakout {
     fn on_event(&mut self, event: &Event) -> Option<Vec<Event>> {
-        match event.event_type {
+        self.scene.on_event(event)
+        /*match event.event_type {
             EventType::BrickDestroyed => {
                 self.num_bricks -= 1;
                 if self.num_bricks == 0 {
@@ -88,7 +93,7 @@ impl EventListener for Breakout {
             }
             _ => ()
         }
-        None
+        None*/
     }
 }
 
@@ -116,7 +121,7 @@ fn main() {
         z_far: 1.0
     };
 
-    let mut game = Box::new(Breakout{
+    /*let mut game = Box::new(Breakout{
         scene: Scene::new("breakout".to_string()),
         state: BreakoutGameState::Setup,
         num_bricks: 0,
@@ -124,5 +129,6 @@ fn main() {
     });
     game.setup();
     game.change_state(Playing);
-    rpgf::run(window_parameters, camera2d, game);
+    rpgf::run(window_parameters, camera2d, game);*/
+    rpgf::run::<Breakout>(window_parameters, camera2d);
 }

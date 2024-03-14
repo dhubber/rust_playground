@@ -22,7 +22,7 @@ pub use event::*;
 use crate::collision::CollisionSolver;
 use crate::event::EventManager;
 pub use crate::game::Game;
-use crate::game::SceneUpdate;
+pub use crate::game::*;
 use crate::renderer::Renderer;
 
 #[derive(Copy, Clone, Debug)]
@@ -50,11 +50,14 @@ implement_vertex!(Vertex2d, position);
 
 
 /// Creates a window using the glium crate
-pub fn run(window_parameters: WindowParameters,
-           camera2d: Camera2d,
-           mut game: Box<dyn Game>
+pub fn run<T: Game + 'static>(window_parameters: WindowParameters,
+           camera2d: Camera2d
           )
 {
+    let game = Rc::new(RefCell::new(T::new()));
+    game.borrow_mut().setup();
+    let player_id = game.borrow().player_id();
+
     let event_loop = winit::event_loop::EventLoopBuilder::new().build();
     let (_window, display) = glium::backend::glutin::SimpleWindowBuilder::new()
         .with_inner_size(window_parameters.width, window_parameters.height)
@@ -64,6 +67,7 @@ pub fn run(window_parameters: WindowParameters,
     let mut collision_solver = Rc::new(RefCell::new(CollisionSolver::new()));
 
     let mut event_manager = EventManager::new();
+    event_manager.register_listener(game.clone());
     event_manager.register_listener(renderer.clone());
     event_manager.register_listener(collision_solver.clone());
 
@@ -86,17 +90,17 @@ pub fn run(window_parameters: WindowParameters,
                     Some(key_code) => match key_code {
                         winit::event::VirtualKeyCode::Left => {
                             event_manager.broadcast_event_queue(Some(vec![
-                                Event{ id: game.player_id(), event_type: EventType::LeftInput(input.state) }
+                                Event{ id: player_id, event_type: EventType::LeftInput(input.state) }
                             ]));
                         },
                         winit::event::VirtualKeyCode::Right => {
                             event_manager.broadcast_event_queue(Some(vec![
-                                Event{ id: game.player_id(), event_type: EventType::RightInput(input.state) }
+                                Event{ id: player_id, event_type: EventType::RightInput(input.state) }
                             ]));
                         },
                         winit::event::VirtualKeyCode::Space => {
                             event_manager.broadcast_event_queue(Some(vec![
-                                Event{ id: game.player_id(), event_type: EventType::FireInput(input.state) }
+                                Event{ id: player_id, event_type: EventType::FireInput(input.state) }
                             ]));
                         }
                         winit::event::VirtualKeyCode::Escape => {
@@ -115,15 +119,15 @@ pub fn run(window_parameters: WindowParameters,
                 let fps: f32 = (num_frames as f32) / time;
                 if num_frames % 100 == 0 {
                     println!("FPS: {fps} {time}");
-                    game.console_log();
+                    //game.console_log();
                 };
-                game.update(time, delta);
-                let events = collision_solver.borrow_mut().update(&game.scene(), time, delta);
+                game.borrow_mut().update(time, delta);
+                let events = collision_solver.borrow_mut().update(&game.borrow().scene(), time, delta);
                 event_manager.broadcast_event_queue(events);
                 _window.request_redraw();
             }
             winit::event::Event::RedrawRequested(_) => {
-                renderer.borrow_mut().update(&game.scene(), time, delta);
+                renderer.borrow_mut().update(&game.borrow().scene(), time, delta);
             }
             _ => (),
         };

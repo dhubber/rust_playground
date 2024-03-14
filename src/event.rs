@@ -51,7 +51,7 @@ impl EventManager {
                 while queue.len() > 0 {
                     let mut new_events: Vec<Event> = Vec::new();
                     for event in queue.iter() {
-                        println!("Broadcasting event {:?} to {} listeners", event, self.listeners.len());
+                        //println!("Broadcasting event {:?} to {} listeners", event, self.listeners.len());
                         for listener in self.listeners.iter() {
                             if let Some(optional_events) = listener.borrow_mut().on_event(event) {
                                 new_events.extend(optional_events);

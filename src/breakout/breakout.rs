@@ -6,7 +6,7 @@ mod brick;
 use rpgf::{Camera2d, Color4, Event, EventListener, EventType, Game, Scene, SceneUpdate, Update, WindowParameters};
 use crate::ball::Ball;
 use crate::bat::Bat;
-use crate::BreakoutGameState::{Playing, Victory};
+use crate::BreakoutGameState::Playing;
 use crate::brick::{Brick, BRICK_SPACING};
 use crate::wall::{Wall, WALL_THICKNESS};
 
@@ -27,7 +27,6 @@ pub struct Breakout {
     state: BreakoutGameState,
     num_bricks: u32,
     bat_id: u128,
-    scene: Scene,
 }
 
 impl Game for Breakout {
@@ -37,20 +36,20 @@ impl Game for Breakout {
             state: BreakoutGameState::Setup,
             num_bricks: NUM_BRICKS[0] * NUM_BRICKS[1],
             bat_id: 0,
-            scene: Scene::new("breakout".to_string())
         }
     }
 
-    fn setup(&mut self) {
-        self.bat_id = self.scene.add_to_scene(Box::new(Bat::new()));
-        let _ball_id = self.scene.add_to_scene(Box::new(Ball::new(self.bat_id)));
-        let _left_wall_id = self.scene.add_to_scene(Box::new(
+    fn create_scene(&mut self) -> Scene {
+        let mut scene = Scene::new("breakout".to_string());
+        self.bat_id = scene.add_to_scene(Box::new(Bat::new()));
+        let _ball_id = scene.add_to_scene(Box::new(Ball::new(self.bat_id)));
+        let _left_wall_id = scene.add_to_scene(Box::new(
             Wall::new([0.5 * (WALL_THICKNESS - LEVEL_WIDTH), 0.0], [WALL_THICKNESS, LEVEL_HEIGHT])
         ));
-        let _right_wall_id = self.scene.add_to_scene(Box::new(
+        let _right_wall_id = scene.add_to_scene(Box::new(
             Wall::new([0.5 * (LEVEL_WIDTH - WALL_THICKNESS), 0.0], [WALL_THICKNESS, LEVEL_HEIGHT])
         ));
-        let _top_wall_id = self.scene.add_to_scene(Box::new(
+        let _top_wall_id = scene.add_to_scene(Box::new(
             Wall::new([0.0, 0.5 * (LEVEL_HEIGHT - WALL_THICKNESS)], [LEVEL_WIDTH - 2.0 * WALL_THICKNESS, WALL_THICKNESS])
         ));
 
@@ -58,14 +57,12 @@ impl Game for Breakout {
             let y = (0.5 * LEVEL_HEIGHT) - WALL_THICKNESS - (((j + 2) as f32) * BRICK_SPACING[1]);
             for i in 0..NUM_BRICKS[0] {
                 let x = ((i as f32) - 0.5 * (NUM_BRICKS[0] as f32) + 0.5) * BRICK_SPACING[0];
-                let _brick_id = self.scene.add_to_scene(Box::new(Brick::new([x, y])));
+                let _brick_id = scene.add_to_scene(Box::new(Brick::new([x, y])));
                 println!("{x} {y}");
             }
         }
-    }
-
-    fn scene(&self) -> &Scene {
-        &self.scene
+        self.change_state(Playing);
+        scene
     }
 
     fn player_id(&self) -> u128 {
@@ -75,25 +72,24 @@ impl Game for Breakout {
 
 impl Update for Breakout {
     fn update(&mut self, time: f32, delta_time: f32) -> Option<Vec<Event>> {
-        self.scene.update(time, delta_time)
+        None
     }
 }
 
 impl EventListener for Breakout {
     fn on_event(&mut self, event: &Event) -> Option<Vec<Event>> {
-        self.scene.on_event(event)
-        /*match event.event_type {
+        match event.event_type {
             EventType::BrickDestroyed => {
                 self.num_bricks -= 1;
                 if self.num_bricks == 0 {
-                    self.change_state(Victory);
+                    self.change_state(BreakoutGameState::Victory);
                     return Some(vec![Event{ id: 0, event_type: EventType::PlayerWins }])
                 }
                 println!("Num bricks: {}    State: {:?}", self.num_bricks, self.state);
             }
             _ => ()
         }
-        None*/
+        None
     }
 }
 

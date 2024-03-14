@@ -55,7 +55,7 @@ pub fn run<T: Game + 'static>(window_parameters: WindowParameters,
           )
 {
     let game = Rc::new(RefCell::new(T::new()));
-    game.borrow_mut().setup();
+    let main_scene = Rc::new(RefCell::new(game.borrow_mut().create_scene()));
     let player_id = game.borrow().player_id();
 
     let event_loop = winit::event_loop::EventLoopBuilder::new().build();
@@ -68,6 +68,7 @@ pub fn run<T: Game + 'static>(window_parameters: WindowParameters,
 
     let mut event_manager = EventManager::new();
     event_manager.register_listener(game.clone());
+    event_manager.register_listener(main_scene.clone());
     event_manager.register_listener(renderer.clone());
     event_manager.register_listener(collision_solver.clone());
 
@@ -121,13 +122,14 @@ pub fn run<T: Game + 'static>(window_parameters: WindowParameters,
                     println!("FPS: {fps} {time}");
                     //game.console_log();
                 };
+                main_scene.borrow_mut().update(time, delta);
                 game.borrow_mut().update(time, delta);
-                let events = collision_solver.borrow_mut().update(&game.borrow().scene(), time, delta);
+                let events = collision_solver.borrow_mut().update(&main_scene.borrow(), time, delta);
                 event_manager.broadcast_event_queue(events);
                 _window.request_redraw();
             }
             winit::event::Event::RedrawRequested(_) => {
-                renderer.borrow_mut().update(&game.borrow().scene(), time, delta);
+                renderer.borrow_mut().update(&main_scene.borrow(), time, delta);
             }
             _ => (),
         };

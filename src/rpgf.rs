@@ -6,12 +6,14 @@ mod event;
 mod collision;
 mod aab;
 mod game;
+mod audio;
 
 #[macro_use]
 extern crate glium;
 extern crate glam;
 
 use std::cell::RefCell;
+use std::path::Path;
 use std::rc::Rc;
 use glium::{implement_vertex};
 use std::time::Instant;
@@ -21,6 +23,7 @@ pub use scene::*;
 pub use event::*;
 use crate::collision::CollisionSolver;
 use crate::event::EventManager;
+pub use crate::audio::*;
 pub use crate::game::Game;
 pub use crate::game::*;
 use crate::renderer::Renderer;
@@ -65,12 +68,15 @@ pub fn run<T: Game + 'static>(window_parameters: WindowParameters,
 
     let mut renderer = Rc::new(RefCell::new(Renderer::new(display, &camera2d, &window_parameters.background_color)));
     let mut collision_solver = Rc::new(RefCell::new(CollisionSolver::new()));
+    let mut audio_system = Rc::new(RefCell::new(AudioSystem::new()));
+    audio_system.borrow_mut().register_audio_file("ball_collision".to_string(), Path::new("ball_collision.mp3"));
 
     let mut event_manager = EventManager::new();
     event_manager.register_listener(game.clone());
     event_manager.register_listener(main_scene.clone());
     event_manager.register_listener(renderer.clone());
     event_manager.register_listener(collision_solver.clone());
+    event_manager.register_listener(audio_system.clone());
 
     let start = Instant::now();
     let mut last_time: f32 = 0.0;

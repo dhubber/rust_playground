@@ -16,7 +16,7 @@ pub enum EventType {
     OnCollisionEnter {id: u128, other: u128, aab1: AxisAlignedBox, aab2: AxisAlignedBox},
     OnCollisionExit {id: u128, other: u128, aab1: AxisAlignedBox, aab2: AxisAlignedBox},
     MoveToPosition {id: u128, position: [f32; 2]},
-    PlayAudio,
+    PlayAudio(String),
 }
 
 #[derive(Clone,Debug)]

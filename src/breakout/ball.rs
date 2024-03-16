@@ -78,7 +78,7 @@ impl GameObject for Ball {
                         self.direction[1] = - self.direction[1];
                     }
                 }
-                Some(vec![Event { id: 0, event_type: EventType::PlayAudio}])
+                Some(vec![Event { id: 0, event_type: EventType::PlayAudio("ball_collision".to_string())}])
             }
             _ => None
         }

@@ -7,6 +7,7 @@ mod collision;
 mod aab;
 mod game;
 mod audio;
+mod application;
 
 #[macro_use]
 extern crate glium;
@@ -23,6 +24,7 @@ pub use scene::*;
 pub use event::*;
 use crate::collision::CollisionSolver;
 use crate::event::EventManager;
+pub use crate::application::*;
 pub use crate::audio::*;
 pub use crate::game::Game;
 pub use crate::game::*;
@@ -50,94 +52,3 @@ pub struct Vertex2d {
     pub position: [f32; 2],
 }
 implement_vertex!(Vertex2d, position);
-
-
-/// Creates a window using the glium crate
-pub fn run<T: Game + 'static>(window_parameters: WindowParameters,
-           camera2d: Camera2d
-          )
-{
-    let game = Rc::new(RefCell::new(T::new()));
-    let main_scene = Rc::new(RefCell::new(game.borrow_mut().create_scene()));
-    let player_id = game.borrow().player_id();
-
-    let event_loop = winit::event_loop::EventLoopBuilder::new().build();
-    let (_window, display) = glium::backend::glutin::SimpleWindowBuilder::new()
-        .with_inner_size(window_parameters.width, window_parameters.height)
-        .build(&event_loop);
-
-    let mut renderer = Rc::new(RefCell::new(Renderer::new(display, &camera2d, &window_parameters.background_color)));
-    let mut collision_solver = Rc::new(RefCell::new(CollisionSolver::new()));
-    let mut audio_system = Rc::new(RefCell::new(AudioSystem::new()));
-    audio_system.borrow_mut().register_audio_file("ball_collision".to_string(), Path::new("ball_collision.mp3"));
-
-    let mut event_manager = EventManager::new();
-    event_manager.register_listener(game.clone());
-    event_manager.register_listener(main_scene.clone());
-    event_manager.register_listener(renderer.clone());
-    event_manager.register_listener(collision_solver.clone());
-    event_manager.register_listener(audio_system.clone());
-
-    let start = Instant::now();
-    let mut last_time: f32 = 0.0;
-    let mut time: f32 = 0.0;
-    let mut delta: f32 = 0.0;
-    let mut num_frames = 0;
-
-    event_loop.run(move |event, _ , control_flow| {
-
-        match event {
-            winit::event::Event::WindowEvent { event, .. } => match event {
-                winit::event::WindowEvent::CloseRequested => control_flow.set_exit(),
-                winit::event::WindowEvent::Resized(window_size) => {
-                    renderer.borrow_mut().resize(window_size.into());
-                },
-                winit::event::WindowEvent::KeyboardInput { device_id: _device_id, input, is_synthetic: _is_synthetic } => match input.virtual_keycode {
-                    None => (),
-                    Some(key_code) => match key_code {
-                        winit::event::VirtualKeyCode::Left => {
-                            event_manager.broadcast_event_queue(Some(vec![
-                                Event{ id: player_id, event_type: EventType::LeftInput(input.state) }
-                            ]));
-                        },
-                        winit::event::VirtualKeyCode::Right => {
-                            event_manager.broadcast_event_queue(Some(vec![
-                                Event{ id: player_id, event_type: EventType::RightInput(input.state) }
-                            ]));
-                        },
-                        winit::event::VirtualKeyCode::Space => {
-                            event_manager.broadcast_event_queue(Some(vec![
-                                Event{ id: player_id, event_type: EventType::FireInput(input.state) }
-                            ]));
-                        }
-                        winit::event::VirtualKeyCode::Escape => {
-                            control_flow.set_exit()
-                        },
-                        _ => (),
-                    },
-                }
-                _ => (),
-            },
-            winit::event::Event::MainEventsCleared => {
-                time = start.elapsed().as_secs_f32();
-                delta = time - last_time;
-                last_time = time;
-                num_frames += 1;
-                let fps: f32 = (num_frames as f32) / time;
-                if num_frames % 100 == 0 {
-                    println!("FPS: {fps} {time}");
-                    //game.console_log();
-                };
-                main_scene.borrow_mut().update(time, delta);
-                game.borrow_mut().update(time, delta);
-                let events = collision_solver.borrow_mut().update(&main_scene.borrow(), time, delta);
-                event_manager.broadcast_event_queue(events);
-                _window.request_redraw();
-            }
-            winit::event::Event::RedrawRequested(_) => {
-                renderer.borrow_mut().update(&main_scene.borrow(), time, delta);
-            }
-            _ => (),
-        };
-    });
-}

@@ -13,11 +13,12 @@ pub struct Ball {
     pub renderable: Renderable,
     direction: [f32; 2],
     speed: f32,
-    bat_id: u128
+    bat_id: u128,
+    gameover_trigger_id: u128,
 }
 
 impl Ball {
-    pub fn new(bat_id: u128) -> Self {
+    pub fn new(bat_id: u128, gameover_trigger_id: u128) -> Self {
         Ball {
             transform2d: Transform2d {
                 position: [START_POSITION[0], START_POSITION[1] + 0.5*(BAT_SIZE[1] + BALL_SIZE)],
@@ -28,7 +29,8 @@ impl Ball {
             },
             direction: INIT_DIRECTION,
             speed: INIT_BALL_SPEED,
-            bat_id
+            bat_id,
+            gameover_trigger_id
         }
     }
 }
@@ -56,6 +58,9 @@ impl GameObject for Ball {
     fn on_event(&mut self, event: &Event) -> Option<Vec<Event>> {
         match event.event_type {
             EventType::OnCollisionEnter{id, other, aab1, aab2} => {
+                if other == self.gameover_trigger_id {
+                    return Some(vec![Event { id: 0, event_type: EventType::BallOutOfBounds}])
+                }
                 if other == self.bat_id {
                     if self.direction[1] < 0.0 {
                         self.speed += BALL_ACCEL;

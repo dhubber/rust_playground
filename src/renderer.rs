@@ -1,7 +1,7 @@
 use glam::Mat4;
 use glium::glutin::surface::WindowSurface;
 use glium::{Program, Surface, VertexBuffer};
-use crate::{Camera2d, Color4, Event, Scene, Vertex2d};
+use crate::{Camera2d, Color4, Event, EventType, Scene, Vertex2d};
 use crate::event::EventListener;
 use crate::game::SceneUpdate;
 
@@ -107,6 +107,25 @@ impl SceneUpdate for Renderer {
 
 impl EventListener for Renderer {
     fn on_event(&mut self, event: &Event) -> Option<Vec<Event>> {
+        match event.event_type {
+            EventType::PlayerWins => {
+                self.background_color = Color4 {
+                    r: 0.0,
+                    g: 0.2,
+                    b: 0.0,
+                    a: 1.0,
+                }
+            },
+            EventType::PlayerLoses => {
+                self.background_color = Color4 {
+                    r: 0.2,
+                    g: 0.0,
+                    b: 0.0,
+                    a: 1.0,
+                }
+            }
+            _ => ()
+        }
         None
     }
 }

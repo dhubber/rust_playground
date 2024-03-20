@@ -2,12 +2,14 @@ mod bat;
 mod wall;
 mod ball;
 mod brick;
+mod gameover_trigger;
 
 use rpgf::{Camera2d, Color4, Event, EventListener, EventType, Game, Scene, SceneUpdate, Update, WindowParameters};
 use crate::ball::Ball;
 use crate::bat::Bat;
 use crate::BreakoutGameState::Playing;
 use crate::brick::{Brick, BRICK_SPACING};
+use crate::gameover_trigger::GameOverTrigger;
 use crate::wall::{Wall, WALL_THICKNESS};
 
 const LEVEL_WIDTH: f32 = 1.0;
@@ -41,8 +43,9 @@ impl Game for Breakout {
 
     fn create_scene(&mut self) -> Scene {
         let mut scene = Scene::new("breakout".to_string());
+        let gameover_trigger_id = scene.add_to_scene(Box::new(GameOverTrigger::new()));
         self.bat_id = scene.add_to_scene(Box::new(Bat::new()));
-        let _ball_id = scene.add_to_scene(Box::new(Ball::new(self.bat_id)));
+        let _ball_id = scene.add_to_scene(Box::new(Ball::new(self.bat_id, gameover_trigger_id)));
         let _left_wall_id = scene.add_to_scene(Box::new(
             Wall::new([0.5 * (WALL_THICKNESS - LEVEL_WIDTH), 0.0], [WALL_THICKNESS, LEVEL_HEIGHT])
         ));
@@ -96,6 +99,10 @@ impl EventListener for Breakout {
                     return Some(vec![Event{ id: 0, event_type: EventType::PlayerWins }])
                 }
                 println!("Num bricks: {}    State: {:?}", self.num_bricks, self.state);
+            }
+            EventType::BallOutOfBounds => {
+                self.change_state(BreakoutGameState::Defeat);
+                return Some(vec![Event { id: 0, event_type: EventType::PlayerLoses }])
             }
             _ => ()
         }

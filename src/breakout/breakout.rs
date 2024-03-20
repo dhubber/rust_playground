@@ -16,6 +16,9 @@ const LEVEL_WIDTH: f32 = 1.0;
 const LEVEL_HEIGHT: f32 = 1.0;
 const START_POSITION: [f32; 2] = [0.0, -0.45];
 const NUM_BRICKS: [u32; 2] = [8, 6];
+const COLOR_LERP_TIME: f32 = 1.0;
+const VICTORY_BG_COLOR: Color4 = Color4 { r: 0.0, g: 0.2, b: 0.0, a: 1.0 };
+const DEFEAT_BG_COLOR: Color4 = Color4 { r: 0.2, g: 0.0, b: 0.0, a: 1.0 };
 
 #[derive(Debug)]
 pub enum BreakoutGameState {
@@ -96,13 +99,15 @@ impl EventListener for Breakout {
                 self.num_bricks -= 1;
                 if self.num_bricks == 0 {
                     self.change_state(BreakoutGameState::Victory);
-                    return Some(vec![Event{ id: 0, event_type: EventType::PlayerWins }])
+                    return Some(vec![Event { id: 0, event_type: EventType::PlayerWins },
+                                     Event { id: 0, event_type: EventType::BackgroundColor(VICTORY_BG_COLOR) }])
                 }
                 println!("Num bricks: {}    State: {:?}", self.num_bricks, self.state);
             }
             EventType::BallOutOfBounds => {
                 self.change_state(BreakoutGameState::Defeat);
-                return Some(vec![Event { id: 0, event_type: EventType::PlayerLoses }])
+                return Some(vec![Event { id: 0, event_type: EventType::PlayerLoses },
+                                 Event { id: 0, event_type: EventType::BackgroundColor(DEFEAT_BG_COLOR) }])
             }
             _ => ()
         }

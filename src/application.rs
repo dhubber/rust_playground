@@ -102,7 +102,6 @@ impl Application {
                     let fps: f32 = (num_frames as f32) / time;
                     if num_frames % 100 == 0 {
                         println!("FPS: {fps} {time}");
-                        //game.console_log();
                     };
                     main_scene.borrow_mut().update(time, delta);
                     game.borrow_mut().update(time, delta);

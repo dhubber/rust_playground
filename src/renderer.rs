@@ -74,9 +74,10 @@ impl SceneUpdate for Renderer {
 
     fn update(&mut self, scene: &Scene, time: f32, delta_time: f32) -> Option<Vec<Event>> {
         let mut frame = self.display.draw();
-        frame.clear_color(self.background_color.r, self.background_color.g, self.background_color.b, self.background_color.a);
+        let color = scene.background_color;
+        frame.clear_color(color.r, color.g, color.b, color.a);
 
-        for object in scene.objects.values(){
+        for object in scene.objects.values() {
             if !object.is_active() {
                 continue;
             }
@@ -107,25 +108,6 @@ impl SceneUpdate for Renderer {
 
 impl EventListener for Renderer {
     fn on_event(&mut self, event: &Event) -> Option<Vec<Event>> {
-        match event.event_type {
-            EventType::PlayerWins => {
-                self.background_color = Color4 {
-                    r: 0.0,
-                    g: 0.2,
-                    b: 0.0,
-                    a: 1.0,
-                }
-            },
-            EventType::PlayerLoses => {
-                self.background_color = Color4 {
-                    r: 0.2,
-                    g: 0.0,
-                    b: 0.0,
-                    a: 1.0,
-                }
-            }
-            _ => ()
-        }
         None
     }
 }

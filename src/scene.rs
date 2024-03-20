@@ -1,10 +1,11 @@
 use std::collections::HashMap;
 use rand::prelude::*;
-use crate::{Event, EventListener, GameObject, Update};
+use crate::{Color4, Event, EventListener, EventType, GameObject, Update};
 
 pub struct Scene {
     pub name: String,
-    pub objects: HashMap<u128,Box<dyn GameObject>>
+    pub objects: HashMap<u128,Box<dyn GameObject>>,
+    pub background_color: Color4,
 }
 
 impl Scene {
@@ -12,6 +13,7 @@ impl Scene {
         Scene {
             name,
             objects: HashMap::new(),
+            background_color: Color4 { r: 0.0, g: 0.0, b: 0.0, a: 1.0, }
         }
     }
 
@@ -49,12 +51,21 @@ impl Update for Scene {
 
 impl EventListener for Scene {
     fn on_event(&mut self, event: &Event) -> Option<Vec<Event>> {
-        let object = self.find_object_mut(&event.id);
-        match object {
-            None => { None }
-            Some(obj) => {
-                obj.on_event(event)
+        match event.event_type {
+            EventType::BackgroundColor(new_color) => {
+                self.background_color = new_color;
+                None
+            }
+            _ => {
+                let object = self.find_object_mut(&event.id);
+                match object {
+                    None => { None }
+                    Some(obj) => {
+                        obj.on_event(event)
+                    }
+                }
             }
         }
     }
+
 }

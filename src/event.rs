@@ -2,6 +2,7 @@ use std::cell::RefCell;
 use std::rc::Rc;
 use winit::event::ElementState;
 use crate::aab::AxisAlignedBox;
+use crate::Color4;
 
 #[derive(Clone,Debug)]
 pub enum EventType {
@@ -17,6 +18,7 @@ pub enum EventType {
     OnCollisionExit {id: u128, other: u128, aab1: AxisAlignedBox, aab2: AxisAlignedBox},
     MoveToPosition {id: u128, position: [f32; 2]},
     PlayAudio(String),
+    BackgroundColor(Color4)
 }
 
 #[derive(Clone,Debug)]
